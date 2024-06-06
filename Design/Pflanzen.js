@@ -4,7 +4,7 @@ let clickThreshold = 10;
 let clickCount = 0;
 let isRed = false;
 let lastClickTime = 0;
-let resetTime = 2000;  // Zeit in Millisekunden, nach der die Pflanzen wieder grün werden
+let resetTime = 2000;  
 let freqExchangePoints = 0;
 let backgroundMusic;
 
@@ -170,7 +170,7 @@ function toggleMusic() {
 
 // MousePressed Event
 function mousePressed() {
-  freqExchangePoints++; // Increase frequency exchange points on each mouse press
+  freqExchangePoints++; 
   clickCount++;
   lastClickTime = millis();
   if (clickCount >= clickThreshold) {
@@ -180,5 +180,5 @@ function mousePressed() {
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight); // Aktualisiere die Größe des Canvas, wenn das Fenstergröße geändert wird
+  resizeCanvas(windowWidth, windowHeight); 
 }
