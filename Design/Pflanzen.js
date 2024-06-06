@@ -84,13 +84,14 @@ function preload() {
 }
 
 let musicButton;
-
+let infoButton;
+let specificLeaf; // Spezifisches Blatt
 
 // Initialisierung
 function setup() {
   frameRate(10);
-  createCanvas(windowWidth, windowHeight); // Setze die Größe des Canvas auf 100% der Bildschirmgröße
-  background(79,148,205); // Himmelblaue Hintergrundfarbe
+  createCanvas(windowWidth, windowHeight);
+  background(79, 148, 205);
   fill("#222");
   noStroke();
   
@@ -98,6 +99,16 @@ function setup() {
   drawingContext.shadowBlur = 20;
   for (var i = 0; i < 50; i++) generateNewBamboo();
   
+  // Spezifisches Blatt erstellen
+  specificLeaf = new Particle({
+    p: createVector(width / 2, height / 2),
+    v: createVector(random(-6, 6), random(-30, -100)),
+    r: random(8, 18),
+    w: random(20, 30),
+    color: color("#76a855") // Eine grüne Farbe für das Blatt
+  });
+  particles.push(specificLeaf);
+
   // Musiksymbol erstellen
   musicButton = createButton('♫');
   musicButton.position(width - 90, 20);
@@ -107,10 +118,37 @@ function setup() {
   musicButton.style('border', 'none');
   musicButton.style('color', 'gray');
   musicButton.style('text-shadow', '1px 2px 3px black');
-  musicButton.mousePressed(toggleMusic); // Hinzufügen des Klick-Events
-  
+  musicButton.mousePressed(toggleMusic);
+
+  // Info-Symbol erstellen
+  infoButton = createButton('i');
+  infoButton.position(width - 150, 20);
+  infoButton.size(50, 50);
+  infoButton.style('font-size', '50px');
+  infoButton.style('background-color', 'transparent');
+  infoButton.style('border', 'none');
+  infoButton.style('color', 'gray');
+  infoButton.style('text-shadow', '1px 2px 3px black');
+  infoButton.mousePressed(openInfoWindow);
+
   // Musik abspielen
-  backgroundMusic.loop(); // Correct reference to backgroundMusic
+  backgroundMusic.loop();
+}
+
+function openInfoWindow() {
+  var infoWindow = document.getElementById('infoWindow');
+  if (infoWindow.style.display === 'block') {
+    infoWindow.style.display = 'none';
+    infoButton.style('color', 'gray'); // Ändert die Farbe des Info-Buttons
+  } else {
+    infoWindow.style.display = 'block';
+    infoButton.style('color', 'white'); // Ändert die Farbe des Info-Buttons
+  }
+}
+
+function closeInfoWindow() {
+  document.getElementById('infoWindow').style.display = 'none';
+  infoButton.style('color', 'gray');
 }
 
 // Partikel erstellen
@@ -176,6 +214,12 @@ function mousePressed() {
   if (clickCount >= clickThreshold) {
     isRed = true;
   }
+  
+  // Überprüfen, ob das spezifische Blatt berührt wurde
+  if (dist(mouseX, mouseY, specificLeaf.p.x, specificLeaf.p.y) < specificLeaf.r) {
+    openInfoWindow();
+  }
+
   for (var i = 0; i < 5; i++) generateNewBamboo();
 }
 
