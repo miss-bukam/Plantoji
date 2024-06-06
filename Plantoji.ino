@@ -1,90 +1,30 @@
 /*
  * Bibliotheken 
  */
-#include <Boards.h>
-#include <Firmata.h>
-#include <FirmataConstants.h>
-#include <FirmataDefines.h>
-#include <FirmataMarshaller.h>
-#include <FirmataParser.h>
 #include <LiquidCrystal.h>
 
 //Soil Moisture
-const int moisturePin = 'An dem Arduino'
-int moistureValue = 0;
-
-
-//Button
-const int buttonPin = 'An dem Arduino'
-bool buttonPressed = false;
-
-//LDR - Lightsensor
-const int ldrPin = 'An dem Arduino'
-int lightValue = 0;
-
-
-//LCD - Screen
-const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;   
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);  
-// rs = number of the Arduino pin that is connected to the RS pin on the LCD
-// en = the number of the Arduino pin that is connected to the enable pin on the LCD
-// d4- d7 = the numbers of the Arduino pins that are connected to the corresponding data pins on the
-
-
-
-// TouchPin
-const int touchPin = 'An dem Arduino'
-
-
-
-
+const int moisturePin = 10;
+const int moisturePowerPin = 0;
+const int soilMoistLevelLow = 200;  
+const int soilMoistLevelHigh = 300; 
 
 /** --------------------------------------------------
  *  ------------  Set UP Method       ----------------
  *  --------------------------------------------------
  */
 void setup() {
- 
-  
+  // Serialization with Baudrate 9600
   Serial.begin(9600);
-  
-  // Button
-  pinMode(buttonPin, INPUT_PULLUP);
-  
-
-
-
-  /*
-       initialise : LCD Screen
-  */
-  lcd.begin(16, 2);   
-
-
-
-  /*
-       initialise : LDR Lightsensor
-  */
-  pinMode(ldrPin,INPUT);
- 
-
-
-
 
   /*
       initialise : Bodenfeuchtigkeit
   */
-
   pinMode(moisturePin,INPUT);
+  pinMode(moisturePowerPin,OUTPUT);
 
 
 
-
-  
-   /*
-       initialise : Touch
-  */
-
-  pinMode(touchPin, INPUT);
   
 }
 
@@ -95,43 +35,29 @@ void setup() {
  *  --------------------------------------------------
  */
 void loop() {
-  
-  /*
-      LDR - Lightsensor
-  */
-
-  lightValue = analogRead(lightPin);
-  /* .....  
-  //Fall 1 :Falls es zu sonnig ist
-
-  //Fall2 : Falls es schattig is
-  
-  */
-
-
-
-  
 
   /*
-       initialise : Toch
+     Bodenfeuchtigkeit
   */
-
-  pinMode(touchPin, INPUT);
-
-  touchValue = analogRead(touchPin);
-  Serial.println(touchValue);
-
-
-
-
-/*
-    Button
-*/
-
-  buttonPressed = !digitalRead(buttonPin);
-  if(buttonPressed){
-    //TODO: Passiert was
-    Serial.print("......");
+  digitalWrite(moisturePowerPin,HIGH);
+  delay(100);
+  int soilMoist = analogRead(moisturePin);
+  Serial.print("Analog Value: ");
+  Serial.print(soilMoist);
+  
+  // Auswertung der Bodenfeuchtigkeit : 200-300 Perfekt für Pflanze 
+  if (soilMoist > soilMoistLevelHigh) {
+    Serial.println(" Status: Der Boden ist zu feucht");
+  } else if (soilMoist >= soilMoistLevelLow && soilMoist < soilMoistLevelHigh) {
+    Serial.println(" Status: Die Bodenfeuchtigkeit ist perfekt");
+  } else {
+    Serial.println(" Status: Der Boden ist zu trocken");
   }
+
+  digitalWrite(moisturePowerPin, LOW);  
+  delay(2000); 
+  
+
+
 
 }
