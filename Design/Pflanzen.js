@@ -93,7 +93,7 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   let currentTime = hour();
 
-  // Hintergrundfarbe basierend auf der Tageszeit festlegen
+  // Hintergrundfarbe basierend auf die Tageszeit 
   if (currentTime >= 6 && currentTime < 12) {
     // Morgen: Gelb
     background(255, 255, 0);
