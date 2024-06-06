@@ -91,7 +91,22 @@ let specificLeaf; // Spezifisches Blatt
 function setup() {
   frameRate(10);
   createCanvas(windowWidth, windowHeight);
-  background(79, 148, 205);
+  let currentTime = hour();
+
+  // Hintergrundfarbe basierend auf der Tageszeit festlegen
+  if (currentTime >= 6 && currentTime < 12) {
+    // Morgen: Gelb
+    background(255, 255, 0);
+  } else if (currentTime >= 12 && currentTime < 18) {
+    // Tag: Hellblau
+    background(173, 216, 230);
+  } else if (currentTime >= 18 && currentTime < 21) {
+    // Abend: Orange
+    background(255, 165, 0);
+  } else {
+    // Nacht: Dunkelblau
+    background(25, 25, 112);
+  }
   fill("#222");
   noStroke();
   
@@ -171,10 +186,12 @@ function generateNewBamboo() {
 
 // Zeichnen
 function draw() {
+  
   particles.forEach(p => {
     p.update();
     p.draw();
   });
+  
   particles = particles.filter(p => random() < 0.99 && !p.dead);
   if (frameCount % 20 == 0) {
     fill(0, 1);
@@ -193,6 +210,7 @@ function draw() {
   textSize(20);
   textAlign(LEFT, TOP);
   text("Frequency Exchange Points: " + freqExchangePoints, 30, 30);
+
 }
 
 // Musik abspielen oder stoppen
