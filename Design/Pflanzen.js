@@ -87,6 +87,23 @@ let musicButton;
 let infoButton;
 let specificLeaf; // Spezifisches Blatt
 
+
+// Farben für verschiedene Tageszeiten
+let morningColors = ["#B0E0E6", "#FFD700"]; // Gelb
+let dayColors = ["#87CEEB", "#B0E0E6"]; // Hellblau
+let eveningColors = ["#FFA500", "#FFD700"]; // Orange
+let nightColors = ["#191970", "#000080"]; // Dunkelblau
+
+// Funktion zum Zeichnen eines Farbverlaufs
+function drawGradient(c1, c2) {
+  for (let y = 0; y < height; y++) {
+    let inter = map(y, 0, height, 0, 1);
+    let c = lerpColor(color(c1), color(c2), inter);
+    stroke(c);
+    line(0, y, width, y);
+  }
+}
+
 // Initialisierung
 function setup() {
   frameRate(10);
@@ -96,16 +113,16 @@ function setup() {
   // Hintergrundfarbe basierend auf die Tageszeit 
   if (currentTime >= 6 && currentTime < 12) {
     // Morgen: Gelb
-    background(255, 255, 0);
+    drawGradient(morningColors[0], morningColors[1]);
   } else if (currentTime >= 12 && currentTime < 18) {
     // Tag: Hellblau
-    background(173, 216, 230);
+    drawGradient(dayColors[0], dayColors[1]);
   } else if (currentTime >= 18 && currentTime < 21) {
     // Abend: Orange
-    background(255, 165, 0);
+    drawGradient(eveningColors[0], eveningColors[1]);
   } else {
     // Nacht: Dunkelblau
-    background(25, 25, 112);
+    drawGradient(nightColors[0], nightColors[1]);
   }
   fill("#222");
   noStroke();
