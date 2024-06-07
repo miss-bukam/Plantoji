@@ -1,12 +1,13 @@
 let greenColors = "cdf2ba-77af5b-76a855-c4e878-e8f78a-dded63-f1f4e6".split("-").map(a => "#" + a);
 let redColors = "ffcccc-ff9999-ff6666-ff3333-ff0000-cc0000-990000".split("-").map(a => "#" + a);
-let clickThreshold = 10;
+let clickThreshold = 7;
 let clickCount = 0;
 let isRed = false;
 let lastClickTime = 0;
 let resetTime = 2000;  
 let freqExchangePoints = 0;
-let backgroundMusic;
+let happyMusic;
+let angryMusic;
 
 
 class Particle {
@@ -80,7 +81,8 @@ let particles = [];
 // Laden der Musikdatei
 function preload() {
   soundFormats('mp3', 'ogg');
-  backgroundMusic = loadSound('Deep_in_the_Forest.mp3');
+  happyMusic = loadSound('Deep_in_the_Forest.mp3');
+  angryMusic = loadSound('READY_TO_FIGHT.mp3')
 }
 
 let musicButton;
@@ -163,8 +165,6 @@ function setup() {
   infoButton.style('text-shadow', '1px 2px 3px black');
   infoButton.mousePressed(openInfoWindow);
 
-  // Musik abspielen
-  backgroundMusic.loop();
 }
 
 function openInfoWindow() {
@@ -232,11 +232,12 @@ function draw() {
 
 // Musik abspielen oder stoppen
 function toggleMusic() {
-  if (backgroundMusic.isPlaying()) {
-    backgroundMusic.stop();
+  if (happyMusic.isPlaying() || angryMusic.isPlaying()) {
+    happyMusic.stop();
+    angryMusic.stop();
     musicButton.style('color', 'gray');
   } else {
-    backgroundMusic.loop();
+    happyMusic.loop();
     musicButton.style('color', 'white');
   }
 }
@@ -256,6 +257,16 @@ function mousePressed() {
   }
 
   for (var i = 0; i < 5; i++) generateNewBamboo();
+  
+  // Überprüfen, ob die schöne Musik läuft und der Benutzer heftig auf den Bildschirm klickt
+  if (happyMusic.isPlaying()) {
+    if (mouseX > width / 4 && mouseX < (width * 3) / 4 && mouseY > height / 4 && mouseY < (height * 3) / 4) {
+      happyMusic.stop();
+      if (!angryMusic.isPlaying()) {
+        angryMusic.loop();
+      }
+    }
+  }
 }
 
 function windowResized() {
