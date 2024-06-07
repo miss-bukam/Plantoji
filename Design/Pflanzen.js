@@ -92,7 +92,7 @@ let specificLeaf; // Spezifisches Blatt
 
 // Farben für verschiedene Tageszeiten
 let morningColors = ["#B0E0E6", "#FFD700"]; // Gelb
-let dayColors = ["#87CEEB", "#B0E0E6"]; // Hellblau
+let dayColors = ["#1874CD", "#B0E0E6"]; // Hellblau
 let eveningColors = ["#FFA500", "#FFD700"]; // Orange
 let nightColors = ["#191970", "#000080"]; // Dunkelblau
 
