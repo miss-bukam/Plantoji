@@ -229,6 +229,8 @@ function draw() {
   text("Frequency Exchange Points: " + freqExchangePoints, 30, 30);
   
   displaySticker();
+  displaySpeechBubble();
+
 
 }
 
@@ -273,10 +275,10 @@ function mousePressed() {
 
 // Sticker anzeigen, wenn 50 Frequency Exchange Points erreicht werden
 function displaySticker() {
-  if (freqExchangePoints >= 1) {
+  if (freqExchangePoints >= 5) {
     // Sticker zeichnen
     fill("#FFD700");
-    rect(20, height - 800, 60, 60);
+    rect(20, height - 800, 60, 60, 40);
     textSize(20);
     fill("#222");
     textAlign(CENTER, CENTER);
@@ -284,6 +286,30 @@ function displaySticker() {
     text("50", 40, height - 770);
   }
 }
+
+// Sprechblase anzeigen, wenn 50 Frequency Exchange Points erreicht werden
+function displaySpeechBubble() {
+  if (freqExchangePoints >= 5) {
+    let bubbleWidth = 250;
+    let bubbleHeight = 100;
+    let bubbleX = (windowWidth - bubbleWidth) / 2;
+    let bubbleY = (windowHeight - bubbleHeight) / 2;
+
+    // Sprechblase zeichnen
+    fill("#EEB422");
+    noStroke();
+    noFill();
+    rect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 40);
+
+    // Text in der Sprechblase anzeigen
+    textAlign(CENTER, CENTER);
+    textSize(16);
+    fill("#FFFFFF");
+    noStroke();
+    text("50 Frequence Exchange Punkte gewonnen!", bubbleX, bubbleY, bubbleWidth, bubbleHeight);
+  }
+}
+
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight); 
