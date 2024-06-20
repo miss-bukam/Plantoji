@@ -203,7 +203,7 @@ function generateNewBamboo() {
 
 // Zeichnen
 function draw() {
-  
+    
   particles.forEach(p => {
     p.update();
     p.draw();
@@ -227,6 +227,8 @@ function draw() {
   textSize(20);
   textAlign(LEFT, TOP);
   text("Frequency Exchange Points: " + freqExchangePoints, 30, 30);
+  
+  displaySticker();
 
 }
 
@@ -266,6 +268,20 @@ function mousePressed() {
         angryMusic.loop();
       }
     }
+  }
+}
+
+// Sticker anzeigen, wenn 50 Frequency Exchange Points erreicht werden
+function displaySticker() {
+  if (freqExchangePoints >= 1) {
+    // Sticker zeichnen
+    fill("#FFD700");
+    rect(20, height - 800, 60, 60);
+    textSize(20);
+    fill("#222");
+    textAlign(CENTER, CENTER);
+    textAlign(LEFT, CENTER);
+    text("50", 40, height - 770);
   }
 }
 
