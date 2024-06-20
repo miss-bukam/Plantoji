@@ -297,8 +297,7 @@ function displaySpeechBubble() {
 
     // Sprechblase zeichnen
     fill("#EEB422");
-    noStroke();
-    noFill();
+    noStroke("#EEB422");
     rect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 40);
 
     // Text in der Sprechblase anzeigen
