@@ -1,7 +1,8 @@
 /*
  * Bibliotheken 
  */
-#include <LiquidCrystal.h>
+//#include <LiquidCrystal.h> //Funktioniert nicht ... BZW schon aber nicht wie wir wollen vielleicht austauschen ??
+#include <Adafruit_CircuitPlayground.h>
 
 //Soil Moisture
 const int moisturePin = 10;
@@ -14,6 +15,7 @@ const int soilMoistLevelHigh = 300;
  *  --------------------------------------------------
  */
 void setup() {
+   CircuitPlayground.begin();
   // Serialization with Baudrate 9600
   Serial.begin(9600);
 
@@ -23,9 +25,6 @@ void setup() {
   pinMode(moisturePin,INPUT);
   pinMode(moisturePowerPin,OUTPUT);
 
-
-
-  
 }
 
 
@@ -53,11 +52,18 @@ void loop() {
   } else {
     Serial.println(" Status: Der Boden ist zu trocken");
   }
-
   digitalWrite(moisturePowerPin, LOW);  
   delay(2000); 
-  
 
+
+  /*
+     Lichtwerte
+  */
+  float lux = CircuitPlayground.lightSensor();
+  Serial.print("Lichtwert: ");
+  Serial.println(lux);
+  
+ delay(1000);
 
 
 }
