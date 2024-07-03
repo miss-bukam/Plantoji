@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,11 +9,16 @@
   <script language="javascript" type="text/javascript" src="Pflanzen.js"></script>
   <!-- OK, YOU CAN MAKE CHANGES BELOW THIS LINE AGAIN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.serialport.min.js"></script>
+
 
   <style>
     body {
       padding: 0;
       margin: 0;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
     
     /* CSS-Styles für das Info-Fenster */
@@ -23,16 +28,28 @@
       left: 80%;
       transform: translate(-50%, -50%);
       height: 700px;
-      width: 300px;
-      padding: 20px;
+      width: 400px;
+      padding: 30px;
       background-color: white;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       border-radius: 10px;
       z-index: 1000;
-      display: none; /* Standardmäßig ausgeblendet */
+      display: none; 
+      overflow-y: auto;
     }
-    #infoWindow h2 {
+    
+    #infoWindow h1 {
       margin-top: 0;
+      text-align: center;
+    }
+    #infoWindow p {
+      margin: 0;
+    }
+    #infoWindow img {
+      display: block;
+      margin: 0 auto; 
+      margin-bottom: 10px;
+      border-radius: 10px;
     }
     
   </style>
@@ -40,8 +57,39 @@
 
 <body>
   <div id="infoWindow">
-    <h2>Pflanzeninformation</h2>
-    <p>Hier stehen Informationen über die Pflanze.</p>
+    <h1>Plant Information</h1>
+    
+    <h2>Origin</h2>
+    <p><b>Family</b>: Araliaceae</p>
+    <p><b>Subfamily</b>: Aralioideae</p>
+    <p><b>Genus</b>: Schefflera</p>
+    <p><b>Species</b>: Schefflera actinophylla</p>
+    
+    <h2>Characteristics</h2>
+    <p><b>Growth Type</b>: Tree</p>
+    <p><b>Flower Shape</b>: Racemes</p>
+    <p><b>Leaf Shape</b>: Palmately compound, long-stalked, oblong-ovate, acute</p>
+    <p><b>Fruit Type</b>: Drupe</p>
+    <p><b>Ornamental Value</b>: Foliage plant</p>
+    <p><b>Growth Habit</b>: Erect</p>
+    <p><b>Leaf Color</b>: Green</p>
+    <p><b>Fruit Color</b>: Red</p>
+    
+    <h2>Application</h2>
+    <p><b>Garden Style</b>: Container garden</p>
+    <p><b>Light</b>: Full sun to partial shade</p>
+    <p><b>Soil Moisture</b>: Moderately dry to moist</p>
+    <p><b>Soil Type</b>: Sandy to loamy</p>
+    <p><b>Use</b>: Interior landscaping, containers, conservatories</p>
+
+    
+    <h2>Images</h2>
+    <img src="https://www.picturethisai.com/wiki-image/1080/152464175044493313.jpeg" 
+      alt="Beschreibung des Bildes" width="300" height="300">
+    <img src="https://www.thespruce.com/thmb/ZeA2psCv-hW38m9Z6X1_ROCJL_k=/1909x1273/filters:no_upscale():max_bytes(150000):strip_icc()/KaraRileySchefflera-detail-a03554c4501f4cdaa3f78bb7e41071c5.jpg" 
+      alt="Beschreibung des Bildes" width="300" height="300">
+    <img src="https://i.pinimg.com/originals/72/95/02/729502c4ae1d2d0a67e37b749364b463.jpg" 
+    alt="Beschreibung des Bildes" width="300" height="300">
   </div>
 </body>
 </html>

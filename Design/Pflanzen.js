@@ -10,6 +10,8 @@ let happyMusic;
 let angryMusic;
 
 
+
+
 class Particle {
   constructor(args) {
     let def = {
@@ -275,7 +277,7 @@ function mousePressed() {
 
 // Sticker anzeigen, wenn 50 Frequency Exchange Points erreicht werden
 function displaySticker() {
-  if (freqExchangePoints >= 5) {
+  if (freqExchangePoints >= 50) {
     // Sticker zeichnen
     fill("#FFD700");
     rect(20, height - 800, 60, 60, 40);
@@ -289,7 +291,7 @@ function displaySticker() {
 
 // Sprechblase anzeigen, wenn 50 Frequency Exchange Points erreicht werden
 function displaySpeechBubble() {
-  if (freqExchangePoints >= 5) {
+  if (freqExchangePoints >= 50) {
     let bubbleWidth = 250;
     let bubbleHeight = 100;
     let bubbleX = (windowWidth - bubbleWidth) / 2;
@@ -306,6 +308,31 @@ function displaySpeechBubble() {
     fill("#FFFFFF");
     noStroke();
     text("50 Frequence Exchange Punkte gewonnen!", bubbleX, bubbleY, bubbleWidth, bubbleHeight);
+  }
+}
+
+// Serielle Daten empfangen
+function serialEvent() {
+  let inData = serial.readLine().trim();
+  if (inData.length > 0) {
+    latestData = inData;
+  }
+}
+
+// Serielle Daten anzeigen
+function displaySerialData() {
+  fill(255);
+  textSize(16);
+  text(latestData, 30, 60);
+
+  if (latestData.includes("zu feucht")) {
+    text("Bitte nicht mehr gießen", 50, 100);
+  } else if (latestData.includes("perfekt")) {
+    text("Mir geht es gut", 50, 100);
+  } else if (latestData.includes("zu trocken")) {
+    text("Ich habe Durst", 50, 100);
+  } else {
+    text("Warte auf Daten...", 50, 100);
   }
 }
 
