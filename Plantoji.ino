@@ -1,14 +1,17 @@
 #include <Adafruit_CircuitPlayground.h>
 
 // Globale Variablen für LED
-int threshold = 5;
+int threshold = 15;
 int current = 0;
+
+int topf = 0;
 
 // Pins für Bodenfeuchtigkeitssensor
 const int moisturePin = 10;
 const int moisturePowerPin = 0;
 const int soilMoistLevelLow = 200;
 const int soilMoistLevelHigh = 300;
+
 
 void setup() {
   Serial.begin(9600);
@@ -22,6 +25,8 @@ void loop() {
   measureMoisture();     // Messung der Bodenfeuchtigkeit
   measureLight();        // Messung des Lichtwerts
   controlLED();          // Steuerung der LEDs
+  checkTouch();          // Überprüfung, ob der Topf angefasst wird
+  delay(100);  // Kurze Pause, um die Serielle Kommunikation nicht zu überlasten
 
 }
 
@@ -41,6 +46,25 @@ void controlLED() {
     }
   }
 }
+
+/*
+Topf-Touch
+*/
+void checkTouch() {
+  topf = CircuitPlayground.readCap(0);
+  Serial.print("Topf Value: ");
+  Serial.println(topf);
+  
+  if (topf > 5) {
+    Serial.println("Topf angefasst");
+    CircuitPlayground.setPixelColor(0, 0, 0, 255);  // Zeige Rot auf der ersten LED an
+  } else {
+    Serial.println("Topf nicht angefasst");
+    CircuitPlayground.setPixelColor(0, 0, 0, 0);  // Zeige Grün auf der ersten LED an, wenn nicht angefasst
+  }
+}
+
+
 
 /*
   Bodenfeuchtigkeit
