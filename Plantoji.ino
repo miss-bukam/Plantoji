@@ -19,9 +19,10 @@ void setup() {
 }
 
 void loop() {
-  controlLED();          // Steuerung der LEDs
   measureMoisture();     // Messung der Bodenfeuchtigkeit
   measureLight();        // Messung des Lichtwerts
+  controlLED();          // Steuerung der LEDs
+
 }
 
 /*
