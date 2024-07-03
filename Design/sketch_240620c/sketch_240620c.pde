@@ -61,6 +61,26 @@ void draw() {
     simulateData();
   }
 
+  // Positionen für die Anzeigen
+  float boxX = width / 4;
+  float boxWidth = width / 2;
+  float boxY = height / 4;
+  float boxHeight = height / 3;
+  float statusY = boxY + 200; // Abstand vom oberen Rand des Rahmens erhöhen
+  float iconOffset = 100; // Abstand zwischen Text und Icon
+
+  // Zeichne den Rahmen
+  stroke(255);
+  noFill();
+  rect(boxX, boxY, boxWidth, boxHeight);
+  
+  // Zeichne den Titel des Rahmens
+  fill(255);
+  textSize(32);
+  text("Gesundheitszustand", width / 2, boxY + 30); // Titel innerhalb des Rahmens
+  
+  textSize(22);
+
   // Bodenfeuchtigkeit
   String moistureStatus = "";
   if (myText.equals("zu feucht")) {
@@ -72,10 +92,11 @@ void draw() {
   } else {
     moistureStatus = "Warte auf Daten...";
   }
-  text(moistureStatus, width / 2, height / 2 - 20);
+  fill(255); // Weiß
+  text(moistureStatus, boxX + boxWidth / 4, statusY - iconOffset);
+  drawStatusIcon(moistureStatus, boxX + boxWidth / 4, statusY, 50);
 
-
-  // Interpretation der Lichtbedingungen basierend auf Lux-Werten
+  // Lichtbedingungen
   String lightStatus = "";
   if (luxValue < 100) {
     lightStatus = "Ich brauche Licht!";
@@ -86,29 +107,42 @@ void draw() {
   } else {
     lightStatus = "Warte auf Daten...";
   }
-  text(lightStatus, width / 2, height / 2 + 20);
+  fill(255);
+  text(lightStatus, boxX + 3 * boxWidth / 4, statusY - iconOffset);
+  drawStatusIcon(lightStatus, boxX + 3 * boxWidth / 4, statusY, 50);
 
-  // Zeichne Icons oder farbige Rechtecke basierend auf den Daten
-  drawStatusIcon(moistureStatus, width / 2 - 200, height / 2, 50);
-  drawStatusIcon(lightStatus, width / 2 + 200, height / 2, 50);
-
-  // Zeige Topf-Berührung an
+  // Topf-Berührung
+  float touchX = width / 2;
+  float touchY = boxY + boxHeight + 60;
   if (topfTouched) {
     fill(0, 0, 255); // Blau
-    ellipse(width / 2, height / 2 + 60, 50, 50);
+    ellipse(touchX, touchY + 20, 50, 50);
     fill(255);
-    text("Topf angefasst", width / 2, height / 2 + 80);
+    text("Topf angefasst", touchX, touchY - 20);
+  } else {
+    fill(128); // Grau
+    ellipse(touchX, touchY + 20, 50, 50);
+    fill(255);
+    text("Topf nicht angefasst", touchX, touchY - 20);
   }
 }
 
 void drawStatusIcon(String status, float x, float y, float size) {
-  if (status.contains("zu feucht")) {
-    fill(0, 0, 255); // Blau
-  } else if (status.contains("perfekt")) {
+  if (status.contains("Bitte nicht mehr gießen")) {
+    fill(255, 0, 0); // Rot
+  } else if (status.contains("Mir geht es gut")) {
     fill(0, 255, 0); // Grün
-  } else if (status.contains("zu trocken") || status.contains("Licht")) {
+  } else if (status.contains("Ich habe Durst")) {
     fill(255, 165, 0); // Orange
-  } else if (status.contains("warm")) {
+  } else if (status.contains("zu feucht")) {
+    fill(255, 0, 0); // Rot
+  } else if (status.contains("Perfekte Lichtverhältnisse")) {
+    fill(0, 255, 0); // Grün
+  } else if (status.contains("zu trocken")) {
+    fill(255, 165, 0); // Orange
+  } else if (status.contains("Ich brauche Licht!")) {
+    fill(255, 165, 0); // Orange
+  } else if (status.contains("Es ist zu warm!")) {
     fill(255, 0, 0); // Rot
   } else {
     fill(128); // Grau
