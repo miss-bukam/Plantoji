@@ -20,6 +20,7 @@ Was wir als nächstes vorhaben:
 
 - [ ] Rauschen entfernen beim Touch und led sensor
 - [ ] LCD Screen richtig verbinden
-- [ ] 
+- [ ] Arduino Daten in CSV Datei speichern
+- [ ] Daten von CSV in JavaScript aufrufen
 
 
