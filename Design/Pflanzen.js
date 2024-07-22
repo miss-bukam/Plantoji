@@ -10,8 +10,6 @@ let happyMusic;
 let angryMusic;
 
 
-
-
 class Particle {
   constructor(args) {
     let def = {

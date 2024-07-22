@@ -1,4 +1,5 @@
 import processing.serial.*;
+import java.io.PrintWriter;
 
 Serial myPort;
 String myText = "";
@@ -6,9 +7,15 @@ float luxValue = 0;
 boolean portAvailable = true;
 boolean topfTouched = false; // Neue Variable für Topf-Berührung
 
+PrintWriter output;
+
 void setup() {
   size(1000, 800);
   textAlign(CENTER, CENTER);
+
+  // CSV-Datei erstellen und Header schreiben
+  output = createWriter("output.csv");
+  output.println("Zeit,Bodenfeuchtigkeit,Luxwert,TopfBeruehrt");
 
   try {
     myPort = new Serial(this, "/dev/cu.usbmodem1101", 9600); // COM3 durch deinen korrekten Port ersetzen
@@ -46,6 +53,10 @@ void serialEvent(Serial myPort) {
   } else {
     topfTouched = false;
   }
+
+  // Daten in CSV-Datei schreiben
+  String timeStamp = str(hour()) + ":" + str(minute()) + ":" + str(second());
+  output.println(timeStamp + "," + myText + "," + luxValue + "," + topfTouched);
 }
 
 void draw() {
@@ -168,4 +179,15 @@ void simulateData() {
     luxValue = 1500;
     topfTouched = false;
   }
+
+  // Daten in CSV-Datei schreiben (für Simulation)
+  String timeStamp = str(hour()) + ":" + str(minute()) + ":" + str(second());
+  output.println(timeStamp + "," + myText + "," + luxValue + "," + topfTouched);
+}
+
+// CSV-Datei schließen, wenn das Programm beendet wird
+void exit() {
+  output.flush();
+  output.close();
+  super.exit();
 }
