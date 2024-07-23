@@ -4,6 +4,7 @@ This project explores the concept of live interaction with plants, aiming to edu
 
 # Requirements:
 [ ] 1. Touching the plant (making plant happy, sad..)
+
 [ ] 2. Watering the plant
 [ ] 3. Adjusting light conditions (putting plant in sunlight / shadow)
 [ ] 4. Providing information about the plant mit - i Button 
