@@ -3,9 +3,9 @@
 This project explores the concept of live interaction with plants, aiming to educate and engage children and teenagers in environments such as museums and biology classes in schools. Our objective is to demonstrate that plants can exhibit responses to various stimuli, suggesting that they possess emotions and feelings. By depicting these reactions through 2D objects on a screen, we show how plants might respond to different emotional states such as happiness, sadness, anger, thirst, changes in temperature and much more.
 
 # Requirements:
-[X] 1. Touching the plant (making plant happy, sad..)
+[x] 1. Touching the plant (making plant happy, sad..)
 
-[X] 2. Watering the plant
+[ ] 2. Watering the plant
 
 [ ] 3. Adjusting light conditions (putting plant in sunlight / shadow)
 
@@ -19,6 +19,7 @@ This project explores the concept of live interaction with plants, aiming to edu
 
 [ ] 8. Automatic watering (probably not)
 
-[X] 9. Plant Health Monitoring mit - H button
+[ ] 9. Plant Health Monitoring mit - H button
 
+[ ] 10. Changing background color 
 
