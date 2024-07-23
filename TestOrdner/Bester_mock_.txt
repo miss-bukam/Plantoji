@@ -27,26 +27,13 @@ let currentHumidity = 0;
 let currentMoisture = 'Optimal';
 let lastDataUpdate = 0; // Zeitpunkt der letzten Aktualisierung
 let lastSensorUpdate = 0; // Zeitpunkt der letzten Sensordaten-Aktualisierung
-let dataUpdateInterval = 5000; // 5 Sekunden
-
-//Für Stickers
-let stickerDisplayed = false;
-// Liste für Sticker-Positionen
-let stickerPoints = [];
+let dataUpdateInterval = 8000; // 8 Sekunden
 
 
-//Für Topf anfassen
-let showInfoOnTouch = false;
 
 
 
 //----------------------------------------------------------------------------------------------
-
-
-
-
-
-
 
 
 
@@ -159,10 +146,6 @@ function togglePlantInfo() {
   showPlantInfo = !showPlantInfo;
 }
 
-
-
-
-
 // ----------------------- Hintergrundbild basierend auf Tageszeit -------------------
 function drawBackground() {
   let currentTime = hour();
@@ -187,101 +170,9 @@ function drawGradient(c1, c2) {
 }
 
 
-
-
-
-
-// -------------------  Sticker anzeigen, wenn 50 Frequency Exchange Points erreicht werden
-function displaySticker() {
-  let stickerInterval = 50;
-  
-  // Überprüfen, ob ein neuer Sticker verliehen werden soll
-  let lastStickerPoint = stickerPoints.length > 0 ? stickerPoints[stickerPoints.length - 1] : 0;
-
-  // Wenn Punkte den letzten Sticker-Punkt + Sticker-Intervall überschreiten und der Sticker noch nicht angezeigt wurde
-  if (points >= lastStickerPoint + stickerInterval && !stickerPoints.includes(points)) {
-    stickerPoints.push(points); // Füge die aktuellen Punkte zum Array hinzu
-  }
-
-  // Zeichnen aller Sticker basierend auf den gespeicherten Punkten
-  for (let i = 0; i < stickerPoints.length; i++) {
-    fill("#FFD700");
-    ellipse(80 + i * 70, height - 80, 60, 60); // Position abhängig von der Anzahl der Sticker
-    textSize(20);
-    fill("#222");
-    textAlign(CENTER, CENTER);
-    text("50", 80 + i * 70, height - 80);
-  }
-}
-
-
-/*------------     Sprechblase anzeigen, wenn 50 Frequency Exchange Points erreicht werden
-function displaySpeechBubble() {
-  if (points >= 50) {
-    let bubbleWidth = 250;
-    let bubbleHeight = 100;
-    let bubbleX = (windowWidth - bubbleWidth) / 2;
-    let bubbleY = (windowHeight - bubbleHeight) / 2;
-
-    // Sprechblase zeichnen
-    fill("#EEB422");
-    noStroke("#EEB422");
-    rect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 40);
-
-    // Text in der Sprechblase anzeigen
-    fill(0);
-    textAlign(CENTER, CENTER);
-    textSize(16);
-    noStroke();
-    text("50 Frequence Exchange Punkte gewonnen!", bubbleX, bubbleY, bubbleWidth, bubbleHeight);
-  }
-}
-*/
-
-
-
-
-
-/* ---------------------   ALLE MOCKFUNKTIONEN        ----------------------- */
-function mockTemperature() {
-  return Math.round(random(15, 30)); // Mock-Wert für Temperatur
-}
-
-function mockHumidity() {
-  return Math.round(random(30, 70)); // Mock-Wert für Luftfeuchtigkeit
-}
-
-function mockMoisture() {
-  return random() > 0.5 ? 'Low' : 'Optimal'; // Mock-Wert für Bodenfeuchtigkeit
-}
-
-function mockLightIntensity() {
-  return random(0, 100); // Mock-Wert für Lichtsensitivität
-}
-
-
-// Aktualisieren der Daten alle 8 Sekunden
-function updateData() {
-  currentTemperature = mockTemperature();
-  currentHumidity = mockHumidity();
-  currentMoisture = mockMoisture();
-  currentLightIntensity = mockLightIntensity();
-}
-
-function mockSensorData() {
-  touchSensitivity = random(0, 10);
-  topf = random(0, 10);
-  processSerialData();
-}
-
-
-
-
-
-
-// -----------------------------------------------------------------------------------
-// ------------------------------ Zeichne Methode -------------------------------------
-// ------------------------------------------------------------------------------------
+// --------------------------------------------------------------
+// ----------------------- Zeichne Methode ----------------------
+// --------------------------------------------------------------
 
 function draw() {
   drawBackground(); // Hintergrund neu zeichnen
@@ -338,7 +229,7 @@ function draw() {
     }
   }
 
-  // ------------- Text für Frequence Exchange Points anzeigen
+  // Text für Frequence Exchange Points anzeigen
   fill(0);
   noStroke();
   textSize(24);
@@ -349,20 +240,20 @@ function draw() {
   textSize(20);
   text(`Points: ${points}`, 20, 60);
 
-  // --------------- Wenn die Pflanze berührt wird, Punkte erhöhen
+  // Wenn die Pflanze berührt wird, Punkte erhöhen
   if (touchSensitivity > 0.1 && millis() - lastTouchUpdate > 5000) {
-    points += 10;
+    points += 1;
     lastTouchUpdate = millis();
   }
 
-  // ---------------  Überprüfen, ob die Bodenfeuchtigkeit niedrig ist
+  // Überprüfen, ob die Bodenfeuchtigkeit niedrig ist
   if (currentMoisture === 'Low') {
     showWaterPopup = true;
   } else {
     showWaterPopup = false;
   }
 
-  //-----  Anzeige des Popups, wenn nötig
+  // Anzeige des Popups, wenn nötig
   if (showWaterPopup) {
     fill(255, 0, 0, 150); // Halbdurchsichtiger roter Hintergrund
     rectMode(CENTER);
@@ -374,7 +265,7 @@ function draw() {
     text("Please water me!", width / 2, height / 2);
   }
 
-  //---------  Buttons der Information von der Planze !!!
+  //Buttons der Information von der Planze !!!
   if (showInfo) {
     displayPlantInfo();
   }
@@ -392,30 +283,59 @@ function draw() {
     showLightPopup = false;
   }
 
-
-  //------ Anzeige des Licht-Popups, wenn nötig
+  // Anzeige des Licht-Popups, wenn nötig
   if (showLightPopup) {
-    if (showLightPopup === 'hell') {
-      fill(128, 128, 128, 150); // Grauer Hintergrund für Schatten-Popup
-    } else {
-      fill(255, 255, 0, 150); // Gelber Hintergrund für Sonnen-Popup
-    }
-    noStroke();
-    ellipseMode(CENTER);
-    ellipse(width / 2, height / 4, 300, 150); // Runde Form für das Popup
+    fill(255, 0, 0, 150); // Halbdurchsichtiger roter Hintergrund
+    rectMode(CENTER);
+    rect(width / 2, height / 4, 400, 100, 10); // Popup-Fenster in der oberen Mitte des Bildschirms
 
-    fill(0); // Schwarzer Text
+    fill(255); // Weißer Text
     textSize(24);
     textAlign(CENTER, CENTER);
     let message = showLightPopup === 'dunkel' ? "Put me under the Sun!" : "Put me in the Shadow!";
     text(message, width / 2, height / 4);
   }
-
-  // Sticker anzeigen, wenn 50 Punkte erreicht werden
-  displaySticker();
-  
-
 }
+
+
+
+
+
+
+/* ---------------------   ALLE MOCKFUNKTIONEN        ----------------------- */
+function mockTemperature() {
+  return Math.round(random(15, 30)); // Mock-Wert für Temperatur
+}
+
+function mockHumidity() {
+  return Math.round(random(30, 70)); // Mock-Wert für Luftfeuchtigkeit
+}
+
+function mockMoisture() {
+  return random() > 0.5 ? 'Low' : 'Optimal'; // Mock-Wert für Bodenfeuchtigkeit
+}
+
+function mockLightIntensity() {
+  return random(0, 100); // Mock-Wert für Lichtsensitivität
+}
+
+
+// Aktualisieren der Daten alle 8 Sekunden
+function updateData() {
+  currentTemperature = mockTemperature();
+  currentHumidity = mockHumidity();
+  currentMoisture = mockMoisture();
+  currentLightIntensity = mockLightIntensity();
+}
+
+function mockSensorData() {
+  touchSensitivity = random(0, 10);
+  topf = random(0, 10);
+  processSerialData();
+}
+
+
+
 
 /**********************************************                               **************************************** 
 ***********************************************      Pflanzen Design          ****************************************
