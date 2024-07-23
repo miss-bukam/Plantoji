@@ -5,7 +5,9 @@ let happyMusic;
 let angryMusic;
 
 let touchSensitivity = 0;
-let topf = 0;
+let highTouchThreshold = 5; 
+let topf = false;
+
 let isRed = false;
 let audioStarted = false;
 let points = 0; // Variable für Punkte
@@ -20,6 +22,7 @@ let showLightPopup = false;
 let infoButton;
 let showInfo = false;
 let showPlantInfo = false;
+let totalHeight = 0;
 
 // --- Für alle 8 Sekunden anzeigen der Werte
 let currentTemperature = 0;
@@ -35,19 +38,119 @@ let stickerDisplayed = false;
 let stickerPoints = [];
 
 
-//Für Topf anfassen
-let showInfoOnTouch = false;
-
 
 
 //----------------------------------------------------------------------------------------------
+/**********************************************                               **************************************** 
+***********************************************      Pflanzen Design          ****************************************
+***********************************************                               ****************************************    
+*/
+
+
+class Particle {
+  constructor(args) {
+    let def = {
+      p: createVector(0, 0),    // Position des Partikels
+      v: createVector(0, 0),    // Geschwindigkeit des Partikels
+      a: createVector(0, 0),    // Beschleunigung des Partikels
+      r: 4,                    // Radius des Partikels
+      w: 10,                   // Breite des Partikels
+      color: color(255),        // Farbe des Partikels
+      child: false,            // Wenn das Partikel ein Kind-Partikel ist
+      lastP: createVector(0, 0), // Letzte Position des Partikels
+      dead: false              // Wenn das Partikel tot ist
+    };
+    Object.assign(def, args);
+    Object.assign(this, def);
+  }
+
+  draw() {
+  //  if (this.dead) return;
+
+    push();
+    translate(this.p.x, this.p.y);
+    rotate(this.v.heading() - PI * 1.5);
+
+    fill(this.color);
+    noStroke();
+
+    // Optionaler visueller Effekt
+    if (random() > 0.7) {
+      let count = int(random(2, 4));
+      for (let i = 0; i < count; i++) {
+        push();
+        rotate((i * 2 - 1) / 1.2 * this.v.heading() / (1 + random(2)) * random(-1, 1) + PI * 0.5);
+        fill(random(colors));
+        beginShape();
+        let ww = this.v.y + random(-5, 5);
+        vertex(0, 0);
+        curveVertex(ww / 2, 5);
+        vertex(ww, 0);
+        curveVertex(ww / 2, -5);
+        endShape(CLOSE);
+        pop();
+      }
+    }
+
+    for (let o = 0; o < this.r; o += 1) {
+      let c = color(random(colors));
+      c.setAlpha(random(80));
+      stroke(c);
+      line(o, 0, o, this.v.y / random(1.5, 2.5));
+    }
+
+    pop();
+  }
+
+  update() {
+   // if (this.dead) return;
+
+    this.lastP = this.p.copy();
+    this.p.add(this.v);
+    this.v.add(this.a);
+    this.v.mult(0.99); // Dämpfung der Geschwindigkeit
+
+    // Färbe die Partikel abhängig von der touchSensitivity
+    if (touchSensitivity == 0) {
+      this.dead = true;
+    } else if (touchSensitivity > 0.1 && touchSensitivity <= 5) {
+      this.color = color(random(colors));
+    } else if (touchSensitivity > 5) {
+      this.color = color(random(redColors));
+    }
+
+    if (this.p.y < -50) {
+      this.dead = true;
+    }
+    if (this.child) {
+      this.r -= 4;
+      if (this.r < 1) {
+        this.dead = true;
+      }
+    }
+  }
+}
+
+
+// Erstellung der PArtikel
+function generateParticles() {
+  for (let i = 0; i < 50; i++) {
+    let p = new Particle({
+      p: createVector(random(width), height + random(50, 100)),
+      v: createVector(random(-2, 2), random(-10, -50)), // Langsamere Geschwindigkeit
+      r: random(8, 18),
+      w: random(20, 30),
+      color: color(random(colors))
+    });
+    particles.push(p);
+  }
+}
 
 
 
 
 
-
-
+//-----------------------------------------------------------------------------------------------------------
 
 
 
@@ -68,7 +171,7 @@ function preload() {
 //--------------Setup Methode----------------------------
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  frameRate(10);
+  frameRate(30);
 
   setupButtons();
   drawBackground();
@@ -80,7 +183,7 @@ function setup() {
 }
 
 function processSerialData() {
-  isRed = topf > 5;
+  showPlantInfo = topf;
 }
 
 
@@ -97,16 +200,6 @@ function setupButtons() {
   infoButton.style('text-shadow', '1px 2px 3px black');
   infoButton.mousePressed(toggleInfo);
   
-   // Zusätzlicher Info-Button
-  let plantInfoButton = createButton('Info');
-  plantInfoButton.position(width - 90, 80); // Position unterhalb des Info-Buttons
-  plantInfoButton.size(50, 50);
-  plantInfoButton.style('font-size', '20px');
-  plantInfoButton.style('background-color', 'transparent');
-  plantInfoButton.style('border', 'none');
-  plantInfoButton.style('color', 'gray');
-  plantInfoButton.style('text-shadow', '1px 2px 3px black');
-  plantInfoButton.mousePressed(togglePlantInfo);
 }
 
 function displayPlantInfo() {
@@ -125,7 +218,7 @@ function toggleInfo() {
   showInfo = !showInfo;
 }
 
-
+// Funktion für die Infobox alls Pot angefasst wird
 function displayPlantDescription() {
   fill(255); // Weißer Hintergrund für die Info-Box
   stroke(0);
@@ -185,10 +278,6 @@ function drawGradient(c1, c2) {
     line(0, y, width, y);
   }
 }
-
-
-
-
 
 
 // -------------------  Sticker anzeigen, wenn 50 Frequency Exchange Points erreicht werden
@@ -259,6 +348,12 @@ function mockLightIntensity() {
   return random(0, 100); // Mock-Wert für Lichtsensitivität
 }
 
+function mockSensorData() {
+  touchSensitivity = random(0, 10);
+  topf = random() > 0.5 ? true : false;
+  processSerialData();
+}
+
 
 // Aktualisieren der Daten alle 8 Sekunden
 function updateData() {
@@ -268,11 +363,7 @@ function updateData() {
   currentLightIntensity = mockLightIntensity();
 }
 
-function mockSensorData() {
-  touchSensitivity = random(0, 10);
-  topf = random(0, 10);
-  processSerialData();
-}
+
 
 
 
@@ -280,18 +371,19 @@ function mockSensorData() {
 
 
 // -----------------------------------------------------------------------------------
-// ------------------------------ Zeichne Methode -------------------------------------
-// ------------------------------------------------------------------------------------
+// ------------------------------ Draw Methode -------__------------------------------
+// -----------------------------------------------------------------------------------
 
 function draw() {
   drawBackground(); // Hintergrund neu zeichnen
 
   particles.forEach(p => {
     p.update();
+    console.log(`Particle at (${p.p.x}, ${p.p.y}), Color: ${p.color.toString()}, Dead: ${p.dead}`);
     p.draw();
   });
 
-  particles = particles.filter(p => !p.dead); // Entfernen Sie die toten Partikel
+ // particles = particles.filter(p => !p.dead); // Entfernen Sie die toten Partikel
 
   // Langsame Aktualisierung der Mock-Daten (alle 8 Sekunden)
   if (millis() - lastDataUpdate > dataUpdateInterval) {
@@ -349,7 +441,13 @@ function draw() {
   textSize(20);
   text(`Points: ${points}`, 20, 60);
 
-  // --------------- Wenn die Pflanze berührt wird, Punkte erhöhen
+ // ---------------  Überprüfen, ob die Pflanze zu stark angefasst wird
+if (touchSensitivity > highTouchThreshold) {
+  points -= 5; // Punkte reduzieren, wenn die Sensitivität über dem Schwellenwert liegt
+  touchSensitivity = 0; // Reset der Sensitivität um mehrfaches Abziehen zu vermeiden
+}
+
+  // ---------------  Wenn die Pflanze berührt wird, Punkte erhöhen
   if (touchSensitivity > 0.1 && millis() - lastTouchUpdate > 5000) {
     points += 10;
     lastTouchUpdate = millis();
@@ -379,6 +477,7 @@ function draw() {
     displayPlantInfo();
   }
 
+ // -----  Anzeigen der Pflanzendaten, wenn topf true ist
   if (showPlantInfo) {
     displayPlantDescription();
   }
@@ -415,106 +514,4 @@ function draw() {
   displaySticker();
   
 
-}
-
-/**********************************************                               **************************************** 
-***********************************************      Pflanzen Design          ****************************************
-***********************************************                               ****************************************    
-*/
-
-function generateParticles() {
-  for (let i = 0; i < 50; i++) {
-    let p = new Particle({
-      p: createVector(random(width), height + random(50, 100)),
-      v: createVector(random(-6, 6), random(-30, -100)),
-      r: random(8, 18),
-      w: random(20, 30),
-      color: color(random(colors))
-    });
-    particles.push(p);
-  }
-}
-
-class Particle {
-  constructor(args) {
-    let def = {
-      p: createVector(0, 0),    // Position des Partikels
-      v: createVector(0, 0),    // Geschwindigkeit des Partikels
-      a: createVector(0, 0),    // Beschleunigung des Partikels
-      r: 4,                    // Radius des Partikels
-      w: 10,                   // Breite des Partikels
-      color: color(255),        // Farbe des Partikels
-      child: false,            // Wenn das Partikel ein Kind-Partikel ist
-      lastP: createVector(0, 0), // Letzte Position des Partikels
-      dead: false              // Wenn das Partikel tot ist
-    };
-    Object.assign(def, args);
-    Object.assign(this, def);
-  }
-
-  draw() {
-    if (this.dead) return;
-
-    push();
-    translate(this.p.x, this.p.y);
-    rotate(this.v.heading() - PI * 1.5);
-
-    fill(this.color);
-    noStroke();
-
-    // Optionale visuelle Gestaltung für den Partikel
-    if (random() > 0.7) {
-      let count = int(random(2, 4));
-      for (let i = 0; i < count; i++) {
-        push();
-        rotate((i * 2 - 1) / 1.2 * this.v.heading() / (1 + random(2)) * random(-1, 1) + PI * 0.5);
-        fill(random(colors));
-        beginShape();
-        let ww = this.v.y + random(-5, 5);
-        vertex(0, 0);
-        curveVertex(ww / 2, 5);
-        vertex(ww, 0);
-        curveVertex(ww / 2, -5);
-        endShape(CLOSE);
-        pop();
-      }
-    }
-
-    for (let o = 0; o < this.r; o += 1) {
-      let c = color(random(colors));
-      c.setAlpha(random(80));
-      stroke(c);
-      line(o, 0, o, this.v.y / random(1.5, 2.5));
-    }
-
-    pop();
-  }
-
-  update() {
-    if (this.dead) return;
-
-    this.lastP = this.p.copy();
-    this.p.add(this.v);
-    this.v.add(this.a);
-    this.v.mult(0.99);
-
-    // Färbe die Partikel abhängig von der touchSensitivity
-    if (touchSensitivity <= 0.1) {
-      this.dead = true; // Die Partikel werden bei geringer Sensitivität nicht angezeigt
-    } else if (touchSensitivity > 0.1 && touchSensitivity <= 5) {
-      this.color = color(random(colors)); // Grüne Farben für Sensitivität von 0.1 bis 5
-    } else if (touchSensitivity > 5) {
-      this.color = color(random(redColors)); // Rote Farben für Sensitivität über 5
-    }
-
-    if (this.p.y < -50) {
-      this.dead = true;
-    }
-    if (this.child) {
-      this.r -= 4;
-      if (this.r < 1) {
-        this.dead = true;
-      }
-    }
-  }
 }
