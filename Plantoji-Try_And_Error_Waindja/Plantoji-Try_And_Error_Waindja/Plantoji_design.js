@@ -37,6 +37,9 @@ let stickerDisplayed = false;
 // Liste für Sticker-Positionen
 let stickerPoints = [];
 
+let plantImages = [];
+
+
 
 
 /**********************************************                               **************************************** 
@@ -151,19 +154,30 @@ function generateParticles() {
 //-----------------------------------------------------------------------------------------------------------
 
 
-
 //--------------Preload Methode----------------------------
 function preload() {
   soundFormats('mp3', 'ogg');
   happyMusic = loadSound('mp3/Deep_in_the_Forest.mp3');
   angryMusic = loadSound('mp3/READY_TO_FIGHT.mp3');
   
-  // Für das Bild in der Infobox
-  plantImage = loadImage('images/schefflera.jpeg', () => {
-    console.log('Bild erfolgreich geladen');
+  // Für die Bilder in der Infobox
+  plantImages.push(loadImage('images/Bild1.jpeg', () => {
+    console.log('Bild 1 erfolgreich geladen');
   }, (err) => {
-    console.error('Fehler beim Laden des Bildes:', err);
-  });
+    console.error('Fehler beim Laden des Bildes 1:', err);
+  }));
+
+  plantImages.push(loadImage('images/Bild2.jpeg', () => {
+    console.log('Bild 2 erfolgreich geladen');
+  }, (err) => {
+    console.error('Fehler beim Laden des Bildes 2:', err);
+  }));
+  
+  plantImages.push(loadImage('images/Bild3.jpeg', () => {
+    console.log('Bild 3 erfolgreich geladen');
+  }, (err) => {
+    console.error('Fehler beim Laden des Bildes 3:', err);
+  }));
 }
 
 //--------------Setup Methode----------------------------
@@ -188,20 +202,23 @@ function processSerialData() {
 //-------------- Info-Button der Pflanze mit H und I und Methoden dazu -------------------
 function setupButtons() {
   // Button für Info
-  infoButton = createButton('H');
+  infoButton = createButton('\u2665'); // Herz-Symbol
   infoButton.position(width - 90, 20); // Position des Info-Buttons oben rechts
   infoButton.size(50, 50);
   infoButton.style('font-size', '30px');
-  infoButton.style('background-color', 'transparent');
-  infoButton.style('border', 'none');
-  infoButton.style('color', 'gray');
+  infoButton.style('background-color', 'gray'); // Grau als Standardfarbe
+  infoButton.style('border', '2px solid gray');
+  infoButton.style('border-radius', '25px');
+  infoButton.style('color', 'white');
   infoButton.style('text-shadow', '1px 2px 3px black');
+  infoButton.style('box-shadow', '2px 2px 10px rgba(0, 0, 0, 0.5)');
+  infoButton.style('cursor', 'pointer');
   infoButton.mousePressed(toggleInfo);
   
 }
 
 function displayPlantInfo() {
-  fill(0);
+  fill(255);
   noStroke();
   textSize(24);
   textAlign(RIGHT, TOP);
@@ -214,43 +231,120 @@ function displayPlantInfo() {
 }
 function toggleInfo() {
   showInfo = !showInfo;
+  if (showInfo) {
+    infoButton.style('background-color', '#76a855'); // Grün bei Aktivierung
+    infoButton.style('border', '2px solid #76a855');
+  } else {
+    infoButton.style('background-color', 'gray'); // Grau bei Deaktivierung
+    infoButton.style('border', '2px solid gray');
+  }
 }
 
 // Funktion für die Infobox alls Pot angefasst wird
 function displayPlantDescription() {
-  fill(255); // Weißer Hintergrund für die Info-Box
-  stroke(0);
-  strokeWeight(2);
-  rectMode(CENTER);
-  // Umrandung der Info-Box
-  rect(width / 2, height / 2, 400, 300, 10);
+  const x = width - 300;
+  const y = height / 2;
+  const boxWidth = 500;
+  const boxHeight = 750; // Erhöhen Sie die Höhe, um Platz für das Bild zu schaffen
+  const padding = 10;
+  const titlePadding = 40;
+  const spaceAfterColon = '   '; // Mehrere Leerzeichen
 
+  // Hintergrund für die Info-Box
+  fill(255); // Weißer Hintergrund
+  noStroke();
+  rectMode(CENTER);
+  // Umrandung der Info-Box mit abgerundeten Ecken
+  rect(x, y, boxWidth, boxHeight, 20);
+
+  // Bilder der Pflanze
   imageMode(CENTER);
-  if (plantImage) {
-    image(plantImage, width / 2, height / 2 - 60, 150, 150); // Bild der Pflanze
+  if (plantImages.length > 0) {
+    const imgY = y - boxHeight / 2 + padding + 75;
+    image(plantImages[0], x - 150, imgY, 150, 150); // Erstes Bild links
+    if (plantImages.length > 1) {
+      image(plantImages[1], x, imgY, 150, 150); // Zweites Bild in der Mitte
+      if (plantImages.length > 2) {
+        image(plantImages[2], x + 150, imgY, 150, 150); // Drittes Bild rechts
+      }
+    }
   } else {
     fill(255, 0, 0);
     textSize(24);
     textAlign(CENTER, CENTER);
-    text('Bild konnte nicht geladen werden.', width / 2, height / 2);
+    text('Bilder konnten nicht geladen werden.', x, y - boxHeight / 2 + padding + 75);
   }
 
-  fill(0); // Textfarbe schwarz
-  noStroke();
-  textSize(18);
-  
-  //Titel
-  text('Schefflera actinophylla', width / 2, height / 2 + 20);
+  // Titel
+  fill(0);
+  textSize(24);
+  textAlign(CENTER, TOP);
+  text('Plant Information', x, y - boxHeight / 2 + padding + 170); // 170, um das Bild zu berücksichtigen
 
-  textSize(16);
-  text('This plant thrives in bright, indirect light. Keep soil consistently moist, but not soggy. It does not like direct sunlight or overly dry soil.', width / 2, height / 2 + 20, 380, 100);
-  text('Providing actual information about the plant. Click the "H" button to view plant details.', width / 2, height / 2 + 100, 380, 100);
+  textSize(18);
+  textAlign(LEFT, TOP);
+  let currentY = y - boxHeight / 2 + padding * 3 + titlePadding + 170; // 170, um das Bild zu berücksichtigen
+
+  function addTextSection(title, content) {
+    fill(0);
+    textSize(20);
+    text(title, x - boxWidth / 2 + padding, currentY);
+    currentY += 30;
+    textSize(16);
+    content.forEach(line => {
+      const splitIndex = line.indexOf(':');
+      if (splitIndex !== -1) {
+        const key = line.substring(0, splitIndex + 1);
+        const value = line.substring(splitIndex + 1).trim();
+
+        fill('#4a752c'); // Dunkelgrün für das Wort vor dem Doppelpunkt
+        textStyle(BOLD); // Fett für das Wort vor dem Doppelpunkt
+        text(key + spaceAfterColon, x - boxWidth / 2 + padding, currentY); // Mehrere Leerzeichen hinzufügen
+
+        fill(0); // Schwarz für den Rest des Textes
+        textStyle(NORMAL); // Normal für den Rest des Textes
+        text(value, x - boxWidth / 2 + padding + textWidth(key + spaceAfterColon), currentY);
+      } else {
+        fill(0);
+        textStyle(NORMAL); // Normal für den Rest des Textes
+        text(line, x - boxWidth / 2 + padding, currentY);
+      }
+      currentY += 20;
+    });
+    currentY += 20; // Abstand zwischen den Abschnitten
+  }
+
+  addTextSection('Origin', [
+    'Origin: New Guinea and Australia',
+    'Family: Araliaceae',
+    'Subfamily: Aralioideae',
+    'Genus: Schefflera',
+    'Species: Schefflera actinophylla'
+  ]);
+
+  addTextSection('Characteristics', [
+    'Growth Type: Tree',
+    'Flower Shape: Racemes',
+    'Leaf Shape: Palmately compound, long-stalked, oblong-ovate, acute',
+    'Fruit Type: Drupe',
+    'Ornamental Value: Foliage plant',
+    'Growth Habit: Erect',
+    'Leaf Color: Green',
+    'Fruit Color: Red'
+  ]);
+
+  addTextSection('Application', [
+    'Garden Style: Container garden',
+    'Light: Full sun to partial shade',
+    'Soil Moisture: Moderately dry to moist',
+    'Soil Type: Sandy to loamy',
+    'Use: Interior landscaping, containers, conservatories'
+  ]);
 }
+
 function togglePlantInfo() {
   showPlantInfo = !showPlantInfo;
 }
-
-
 
 
 
@@ -381,7 +475,7 @@ function draw() {
     p.draw();
   });
 
- // particles = particles.filter(p => !p.dead); // Entfernen Sie die toten Partikel
+  particles = particles.filter(p => !p.dead); // Entfernen Sie die toten Partikel
 
   // Langsame Aktualisierung der Mock-Daten (alle 8 Sekunden)
   if (millis() - lastDataUpdate > dataUpdateInterval) {
@@ -433,11 +527,9 @@ function draw() {
   noStroke();
   textSize(24);
   textAlign(LEFT, TOP);
-  text('Frequence Exchange points', 20, 20);
+  fill(255)
+  text(`Frequence Exchange points: ${points}`, 20, 20);
 
-  // Punkte anzeigen
-  textSize(20);
-  text(`Points: ${points}`, 20, 60);
 
  // ---------------  Überprüfen, ob die Pflanze zu stark angefasst wird
 if (touchSensitivity > highTouchThreshold) {
@@ -467,7 +559,7 @@ if (touchSensitivity > highTouchThreshold) {
     fill(255); // Weißer Text
     textSize(24);
     textAlign(CENTER, CENTER);
-    text("Please water me!", width / 2, height / 2);
+    text("Please water me! :(", width / 2, height / 2);
   }
 
   //---------  Buttons der Information von der Planze !!!
@@ -495,16 +587,16 @@ if (touchSensitivity > highTouchThreshold) {
     if (showLightPopup === 'hell') {
       fill(128, 128, 128, 150); // Grauer Hintergrund für Schatten-Popup
     } else {
-      fill(255, 255, 0, 150); // Gelber Hintergrund für Sonnen-Popup
+      fill(255,185,15); // Gelber Hintergrund für Sonnen-Popup
     }
     noStroke();
     ellipseMode(CENTER);
     ellipse(width / 2, height / 4, 300, 150); // Runde Form für das Popup
 
-    fill(0); // Schwarzer Text
     textSize(24);
     textAlign(CENTER, CENTER);
-    let message = showLightPopup === 'dunkel' ? "Put me under the Sun!" : "Put me in the Shadow!";
+    fill(255);
+    let message = showLightPopup === 'dunkel' ? "Put me under the Sun! :(" : "Put me in the Shadow :(!";
     text(message, width / 2, height / 4);
   }
 
