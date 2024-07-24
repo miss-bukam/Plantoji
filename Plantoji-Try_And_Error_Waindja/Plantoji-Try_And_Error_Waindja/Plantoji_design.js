@@ -17,6 +17,7 @@ let currentLightIntensity = 0; //Mock für lichtintensity
 // Die Pop-Ups :) 
 let showWaterPopup = false;
 let showLightPopup = false;
+let showSunPopup = false;
 
 //Buttons der Pflanze
 let infoButton;
@@ -57,8 +58,6 @@ class Particle {
   }
 
   draw() {
-  //  if (this.dead) return;
-
     push();
     translate(this.p.x, this.p.y);
     rotate(this.v.heading() - PI * 1.5);
@@ -95,8 +94,6 @@ class Particle {
   }
 
   update() {
-   // if (this.dead) return;
-
     this.lastP = this.p.copy();
     this.p.add(this.v);
     this.v.add(this.a);
@@ -200,17 +197,51 @@ function setupButtons() {
 }
 
 function displayPlantInfo() {
-  fill(255);
-  noStroke();
-  textSize(24);
-  textAlign(RIGHT, TOP);
-  text(`Touch Sensitivity: ${touchSensitivity}`, width - 20, 60);
-  text(`Pot Touch: ${topf}`, width - 20, 100);
-  text(`Temperature: ${currentTemperature} °C`, width - 20, 140);
-  text(`Humidity: ${currentHumidity} %`, width - 20, 180);
-  text(`Moisture: ${currentMoisture}`, width - 20, 220);
-  text(`Mood: ${isRed ? 'Angry' : 'Happy'}`, width - 20, 260);
+  const x = width - 300;
+  const y = 190;
+  const boxWidth = 350;
+  const boxHeight = 230; // Height adjusted for better spacing
+  const padding = 20;
+
+  // Background for the info box
+  fill(255); // White background
+  stroke(200); // Light grey border
+  strokeWeight(2);
+  rectMode(CENTER);
+  rect(x, y, boxWidth, boxHeight, 20); // Rounded corners
+
+  // Title
+  fill(0);
+  textSize(22);
+  textAlign(CENTER, TOP);
+  textStyle(BOLD);
+  text('Plant Status', x, y - boxHeight / 2 + padding);
+
+  textSize(16);
+  textAlign(LEFT, TOP);
+  textStyle(NORMAL);
+
+  let infoY = y - boxHeight / 2 + padding * 3.5;
+
+  function displayInfoLine(label, value) {
+    const spacing = '    '; // Four spaces for larger spacing
+    fill('#4a752c'); // Dark green for label
+    textStyle(BOLD);
+    text(label + ": " + spacing, x - boxWidth / 2 + padding, infoY);
+    fill(0); // Black for value
+    textStyle(NORMAL);
+    text(value, x - boxWidth / 2 + padding + textWidth(label + ": " + spacing), infoY);
+    infoY += 24; // Increase line height for spacing
+  }
+
+  displayInfoLine("Touch Sensitivity", touchSensitivity);
+  displayInfoLine("Pot Touch", topf);
+  displayInfoLine("Temperature", currentTemperature + " °C");
+  displayInfoLine("Humidity", currentHumidity + " %");
+  displayInfoLine("Moisture", currentMoisture);
+  displayInfoLine("Mood", isRed ? 'Angry' : 'Happy');
 }
+
 function toggleInfo() {
   showInfo = !showInfo;
   if (showInfo) {
@@ -226,7 +257,7 @@ function toggleInfo() {
 function displayPlantDescription() {
   const x = width - 300;
   const y = height / 2;
-  const boxWidth = 500;
+  const boxWidth = 520;
   const boxHeight = 750; // Erhöhen Sie die Höhe, um Platz für das Bild zu schaffen
   const padding = 10;
   const titlePadding = 40;
@@ -374,29 +405,6 @@ function displaySticker() {
   }
 }
 
-/*------------     Sprechblase anzeigen, wenn 50 Frequency Exchange Points erreicht werden
-function displaySpeechBubble() {
-  if (points >= 50) {
-    let bubbleWidth = 250;
-    let bubbleHeight = 100;
-    let bubbleX = (windowWidth - bubbleWidth) / 2;
-    let bubbleY = (windowHeight - bubbleHeight) / 2;
-
-    // Sprechblase zeichnen
-    fill("#EEB422");
-    noStroke("#EEB422");
-    rect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 40);
-
-    // Text in der Sprechblase anzeigen
-    fill(0);
-    textAlign(CENTER, CENTER);
-    textSize(16);
-    noStroke();
-    text("50 Frequence Exchange Punkte gewonnen!", bubbleX, bubbleY, bubbleWidth, bubbleHeight);
-  }
-}
-*/
-
 // ---------------------   ALLE MOCKFUNKTIONEN        -----------------------
 function mockTemperature() {
   return Math.round(random(15, 30)); // Mock-Wert für Temperatur
@@ -496,72 +504,67 @@ function draw() {
   fill(255)
   text(`Frequence Exchange points: ${points}`, 20, 20);
 
- // ---------------  Überprüfen, ob die Pflanze zu stark angefasst wird
-if (touchSensitivity > highTouchThreshold) {
-  points -= 5; // Punkte reduzieren, wenn die Sensitivität über dem Schwellenwert liegt
-  touchSensitivity = 0; // Reset der Sensitivität um mehrfaches Abziehen zu vermeiden
-}
+  // --------------- Überprüfen, ob die Pflanze zu stark angefasst wird
+  if (touchSensitivity > highTouchThreshold) {
+    points -= 5; // Punkte reduzieren, wenn die Sensitivität über dem Schwellenwert liegt
+    touchSensitivity = 0; // Reset der Sensitivität um mehrfaches Abziehen zu vermeiden
+  }
 
-  // ---------------  Wenn die Pflanze berührt wird, Punkte erhöhen
+  // --------------- Wenn die Pflanze berührt wird, Punkte erhöhen
   if (touchSensitivity > 0.1 && millis() - lastTouchUpdate > 5000) {
     points += 10;
     lastTouchUpdate = millis();
   }
 
-  // ---------------  Überprüfen, ob die Bodenfeuchtigkeit niedrig ist
+  // --------------- Überprüfen, ob die Bodenfeuchtigkeit niedrig ist
   if (currentMoisture === 'Low') {
     showWaterPopup = true;
   } else {
     showWaterPopup = false;
   }
 
-  //-----  Anzeige des Popups, wenn nötig
-  if (showWaterPopup) {
-    fill(255, 0, 0, 150); // Halbdurchsichtiger roter Hintergrund
-    rectMode(CENTER);
-    rect(width / 2, height / 2, 300, 100, 10); // Popup-Fenster
-
-    fill(255); // Weißer Text
-    textSize(24);
-    textAlign(CENTER, CENTER);
-    text("Please water me! :(", width / 2, height / 2);
+  // Mood auf angry setzen oder zurücksetzen
+  if (showWaterPopup || showLightPopup || showSunPopup) {
+    isRed = true;
+  } else {
+    isRed = false;
   }
 
-  //---------  Buttons der Information von der Planze !!!
+  // Anzeige der standardmäßig grauen Popups
+  drawGrayPopups();
+
+  // Anzeige der Popups, wenn sie getriggert werden
+  if (showWaterPopup) {
+    drawWaterPopup();
+    isRed = true; // Mood auf angry setzen
+  }
+  if (showLightPopup) {
+    drawLightPopup();
+    isRed = true; // Mood auf angry setzen
+  }
+  if (showSunPopup) {
+    drawSunPopup();
+    isRed = true; // Mood auf angry setzen
+  }
+
+  //--------- Buttons der Information von der Planze !!!
   if (showInfo) {
     displayPlantInfo();
   }
 
- // -----  Anzeigen der Pflanzendaten, wenn topf true ist
+  // ----- Anzeigen der Pflanzendaten, wenn topf true ist
   if (showPlantInfo) {
     displayPlantDescription();
   }
 
   // Überprüfen, ob die Lichtverhältnisse ungünstig sind
   if (currentLightIntensity < 20) {
-    showLightPopup = 'dunkel';
+    showLightPopup = true;
   } else if (currentLightIntensity > 80) {
-    showLightPopup = 'hell';
+    showSunPopup = true;
   } else {
     showLightPopup = false;
-  }
-
-  //------ Anzeige des Licht-Popups, wenn nötig
-  if (showLightPopup) {
-    if (showLightPopup === 'hell') {
-      fill(128, 128, 128, 150); // Grauer Hintergrund für Schatten-Popup
-    } else {
-      fill(255,185,15); // Gelber Hintergrund für Sonnen-Popup
-    }
-    noStroke();
-    ellipseMode(CENTER);
-    ellipse(width / 2, height / 4, 300, 150); // Runde Form für das Popup
-
-    textSize(24);
-    textAlign(CENTER, CENTER);
-    fill(255);
-    let message = showLightPopup === 'dunkel' ? "Put me under the Sun! :(" : "Put me in the Shadow :(!";
-    text(message, width / 2, height / 4);
+    showSunPopup = false;
   }
 
   // Sticker anzeigen, wenn 50 Punkte erreicht werden
@@ -571,15 +574,85 @@ if (touchSensitivity > highTouchThreshold) {
   displaySmiley();
 }
 
+function drawGrayPopups() {
+  // Zeichnet graue Platzhalter-Popups
+  fill(128, 128, 128, 150); // Grauer Hintergrund
+  noStroke();
+  rectMode(CENTER);
+
+  // Platzhalter für Wasser-Popup
+  fill(128, 128, 128);
+  rect(width / 2, height / 2 - 200, 300, 100, 10); // Adjusted vertical position
+  fill(255);
+  textSize(24);
+  textAlign(CENTER, CENTER);
+  text("💧 Please water me!", width / 2, height / 2 - 200);
+
+  // Platzhalter für Licht-Popup (Schatten)
+  fill(128, 128, 128); // Grauer Hintergrund für deaktiviertes Popup
+  rect(width / 2, height / 2, 300, 100, 10); // Adjusted vertical position
+  fill(255);
+  textSize(24);
+  textAlign(CENTER, CENTER);
+  text("❄️ Put me in the Shadow!", width / 2, height / 2);
+
+  // Platzhalter für Licht-Popup (Sonne)
+  fill(128, 128, 128); // Grauer Hintergrund für deaktiviertes Popup
+  rect(width / 2, height / 2 + 200, 300, 100, 10); // Adjusted vertical position
+  fill(255);
+  textSize(24);
+  textAlign(CENTER, CENTER);
+  text("☀️ Put me under the Sun!", width / 2, height / 2 + 200);
+}
+
+function drawWaterPopup() {
+  fill(255, 0, 0, 150); // Roter Hintergrund
+  rectMode(CENTER);
+  rect(width / 2, height / 2 - 200, 300, 100, 10); // Adjusted vertical position
+
+  fill(255); // Weißer Text
+  textSize(24);
+  textAlign(CENTER, CENTER);
+  text("💧 Please water me!", width / 2, height / 2 - 200);
+}
+
+function drawLightPopup() {
+  fill(255, 0, 0, 150); // Dunkelblauer Hintergrund für Schatten-Popup
+  noStroke();
+  rectMode(CENTER);
+  rect(width / 2, height / 2, 300, 100, 10); // Adjusted vertical position
+
+  fill(255); // Weißer Text
+  textSize(24);
+  textAlign(CENTER, CENTER);
+  text("❄️ Put me in the Shadow!", width / 2, height / 2);
+}
+
+function drawSunPopup() {
+  fill(0, 0, 128, 150); // Dunkelgelber Hintergrund für Sonnen-Popup
+  noStroke();
+  rectMode(CENTER);
+  rect(width / 2, height / 2 + 200, 300, 100, 10); // Adjusted vertical position
+
+  fill(255); // Weißer Text
+  textSize(24);
+  textAlign(CENTER, CENTER);
+  text("☀️ Put me under the Sun!", width / 2, height / 2 + 200);
+}
+
 // Funktion zum Anzeigen eines Smileys basierend auf der Stimmung
 function displaySmiley() {
-  let smileyX = width / 2;
-  let smileyY = height / 4;
-  let smileySize = 100;
-  let eyeSize = 10;
+  let smileyX = 300; // Smiley nach links verschieben
+  let smileyY = height / 2;
+  let smileySize = 300; // Größere Größe für den Smiley
+  let eyeSize = 20;
 
   // Smiley-Gesicht
-  fill(255, 255, 0);
+  if (isRed) {
+    fill(0, 0, 255); // Blau für traurigen Smiley
+  } else {
+    fill(255, 255, 0); // Gelb für glücklichen Smiley
+  }
   ellipse(smileyX, smileyY, smileySize);
 
   // Augen
@@ -592,9 +665,9 @@ function displaySmiley() {
   stroke(0);
   strokeWeight(4);
 
-  if (touchSensitivity > 5) {
-    // Böser Gesichtsausdruck
-    arc(smileyX, smileyY, smileySize / 2, smileySize / 2, 0, PI, OPEN);
+  if (isRed) {
+    // Trauriger Gesichtsausdruck
+    arc(smileyX, smileyY, smileySize / 2, smileySize / 2, PI, 0, OPEN);
   } else {
     // Glücklicher Gesichtsausdruck
     arc(smileyX, smileyY, smileySize / 2, smileySize / 2, 0, PI, CHORD);
