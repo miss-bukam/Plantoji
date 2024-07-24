@@ -39,15 +39,6 @@ let stickerPoints = [];
 
 let plantImages = [];
 
-
-
-
-/**********************************************                               **************************************** 
-***********************************************      Pflanzen Design          ****************************************
-***********************************************                               ****************************************    
-*/
-
-
 class Particle {
   constructor(args) {
     let def = {
@@ -132,7 +123,6 @@ class Particle {
   }
 }
 
-
 // Erstellung der PArtikel
 function generateParticles() {
   for (let i = 0; i < 50; i++) {
@@ -146,13 +136,6 @@ function generateParticles() {
     particles.push(p);
   }
 }
-
-
-
-//-----------------------------------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------------------------------
-
 
 //--------------Preload Methode----------------------------
 function preload() {
@@ -197,7 +180,6 @@ function setup() {
 function processSerialData() {
   showPlantInfo = topf;
 }
-
 
 //-------------- Info-Button der Pflanze mit H und I und Methoden dazu -------------------
 function setupButtons() {
@@ -346,8 +328,6 @@ function togglePlantInfo() {
   showPlantInfo = !showPlantInfo;
 }
 
-
-
 // ----------------------- Hintergrundbild basierend auf Tageszeit -------------------
 function drawBackground() {
   let currentTime = hour();
@@ -370,7 +350,6 @@ function drawGradient(c1, c2) {
     line(0, y, width, y);
   }
 }
-
 
 // -------------------  Sticker anzeigen, wenn 50 Frequency Exchange Points erreicht werden
 function displaySticker() {
@@ -395,7 +374,6 @@ function displaySticker() {
   }
 }
 
-
 /*------------     Sprechblase anzeigen, wenn 50 Frequency Exchange Points erreicht werden
 function displaySpeechBubble() {
   if (points >= 50) {
@@ -419,11 +397,7 @@ function displaySpeechBubble() {
 }
 */
 
-
-
-
-
-/* ---------------------   ALLE MOCKFUNKTIONEN        ----------------------- */
+// ---------------------   ALLE MOCKFUNKTIONEN        -----------------------
 function mockTemperature() {
   return Math.round(random(15, 30)); // Mock-Wert für Temperatur
 }
@@ -446,7 +420,6 @@ function mockSensorData() {
   processSerialData();
 }
 
-
 // Aktualisieren der Daten alle 8 Sekunden
 function updateData() {
   currentTemperature = mockTemperature();
@@ -454,13 +427,6 @@ function updateData() {
   currentMoisture = mockMoisture();
   currentLightIntensity = mockLightIntensity();
 }
-
-
-
-
-
-
-
 
 // -----------------------------------------------------------------------------------
 // ------------------------------ Draw Methode -------__------------------------------
@@ -530,7 +496,6 @@ function draw() {
   fill(255)
   text(`Frequence Exchange points: ${points}`, 20, 20);
 
-
  // ---------------  Überprüfen, ob die Pflanze zu stark angefasst wird
 if (touchSensitivity > highTouchThreshold) {
   points -= 5; // Punkte reduzieren, wenn die Sensitivität über dem Schwellenwert liegt
@@ -581,7 +546,6 @@ if (touchSensitivity > highTouchThreshold) {
     showLightPopup = false;
   }
 
-
   //------ Anzeige des Licht-Popups, wenn nötig
   if (showLightPopup) {
     if (showLightPopup === 'hell') {
@@ -602,6 +566,37 @@ if (touchSensitivity > highTouchThreshold) {
 
   // Sticker anzeigen, wenn 50 Punkte erreicht werden
   displaySticker();
-  
 
+  // Smiley anzeigen basierend auf der Stimmung
+  displaySmiley();
+}
+
+// Funktion zum Anzeigen eines Smileys basierend auf der Stimmung
+function displaySmiley() {
+  let smileyX = width / 2;
+  let smileyY = height / 4;
+  let smileySize = 100;
+  let eyeSize = 10;
+
+  // Smiley-Gesicht
+  fill(255, 255, 0);
+  ellipse(smileyX, smileyY, smileySize);
+
+  // Augen
+  fill(0);
+  ellipse(smileyX - smileySize / 4, smileyY - smileySize / 4, eyeSize);
+  ellipse(smileyX + smileySize / 4, smileyY - smileySize / 4, eyeSize);
+
+  // Mund
+  noFill();
+  stroke(0);
+  strokeWeight(4);
+
+  if (touchSensitivity > 5) {
+    // Böser Gesichtsausdruck
+    arc(smileyX, smileyY, smileySize / 2, smileySize / 2, 0, PI, OPEN);
+  } else {
+    // Glücklicher Gesichtsausdruck
+    arc(smileyX, smileyY, smileySize / 2, smileySize / 2, 0, PI, CHORD);
+  }
 }
