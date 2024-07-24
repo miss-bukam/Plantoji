@@ -1,0 +1,273 @@
+let colors = "cdf2ba-77af5b-76a855-c4e878-e8f78a-dded63-f1f4e6".split("-").map(a => "#" + a);
+let redColors = ["#ffcccc", "#ff9999", "#ff6666", "#ff3333", "#ff0000", "#cc0000", "#990000"];
+let particles = [];
+let happyMusic;
+let angryMusic;
+let musicButton;
+let infoButton;
+let showInfo = false;
+
+let touchSensitivity = 0;
+let topf = 0;
+let isRed = false;
+let lastMockUpdate = 0;
+let audioStarted = false;
+
+function preload() {
+  soundFormats('mp3', 'ogg');
+  happyMusic = loadSound('mp3/Deep_in_the_Forest.mp3');
+  angryMusic = loadSound('mp3/READY_TO_FIGHT.mp3');
+}
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  frameRate(10);
+
+  setupButtons();
+  drawBackground();
+  generateParticles();
+
+  // Mock-Daten alle 8 Sekunden initialisieren
+  lastMockUpdate = millis();
+}
+
+function setupButtons() {
+  musicButton = createButton('♫');
+  musicButton.position(width - 90, 20);
+  musicButton.size(50, 50);
+  musicButton.style('font-size', '50px');
+  musicButton.style('background-color', 'transparent');
+  musicButton.style('border', 'none');
+  musicButton.style('color', 'gray');
+  musicButton.style('text-shadow', '1px 2px 3px black');
+  musicButton.mousePressed(toggleMusic);
+
+  infoButton = createButton('ℹ️');
+  infoButton.position(20, 20);
+  infoButton.size(50, 50);
+  infoButton.style('font-size', '30px');
+  infoButton.style('background-color', 'transparent');
+  infoButton.style('border', 'none');
+  infoButton.style('color', 'gray');
+  infoButton.style('text-shadow', '1px 2px 3px black');
+  infoButton.mousePressed(toggleInfo);
+}
+
+function drawBackground() {
+  let currentTime = hour();
+  if (currentTime >= 6 && currentTime < 12) {
+    drawGradient("#B0E0E6", "#FFD700"); // Morgen
+  } else if (currentTime >= 12 && currentTime < 18) {
+    drawGradient("#1874CD", "#B0E0E6"); // Tag
+  } else if (currentTime >= 18 && currentTime < 21) {
+    drawGradient("#8470FF", "#FF7F24"); // Abend
+  } else {
+    drawGradient("#191970", "#000080"); // Nacht
+  }
+}
+
+function drawGradient(c1, c2) {
+  for (let y = 0; y < height; y++) {
+    let inter = map(y, 0, height, 0, 1);
+    let c = lerpColor(color(c1), color(c2), inter);
+    stroke(c);
+    line(0, y, width, y);
+  }
+}
+
+function generateParticles() {
+  for (let i = 0; i < 50; i++) {
+    let p = new Particle({
+      p: createVector(random(width), height + random(50, 100)),
+      v: createVector(random(-6, 6), random(-30, -100)),
+      r: random(8, 18),
+      w: random(20, 30),
+      color: color(random(colors))
+    });
+    particles.push(p);
+  }
+}
+
+function mockSensorData() {
+  touchSensitivity = random(0, 10);
+  topf = random(0, 10);
+  processSerialData();
+}
+
+function processSerialData() {
+  isRed = topf > 5;
+}
+
+function draw() {
+  drawBackground(); // Hintergrund neu zeichnen
+
+  particles.forEach(p => {
+    p.update();
+    p.draw();
+  });
+
+  particles = particles.filter(p => random() < 0.99 && !p.dead);
+
+  // Langsame Aktualisierung der Mock-Daten (alle 8 Sekunden)
+  if (millis() - lastMockUpdate > 8000) {
+    mockSensorData();
+    lastMockUpdate = millis();
+  }
+
+  // Musik und Partikel-Farben entsprechend der Sensitivität aktualisieren
+  if (touchSensitivity > 5) {
+    particles.forEach(p => {
+      p.color = color(random(redColors));
+    });
+
+    // Audio starten, wenn die Sensitivität hoch genug ist
+    if (!audioStarted || !angryMusic.isPlaying()) {
+      getAudioContext().resume().then(() => {
+        audioStarted = true;
+        happyMusic.stop();
+        angryMusic.loop();
+      }).catch(error => {
+        console.error("AudioContext konnte nicht gestartet werden:", error);
+      });
+    }
+  } else {
+    particles.forEach(p => {
+      p.color = color(random(colors));
+    });
+
+    // Audio stoppen, wenn die Sensitivität unter 5 ist
+    if (audioStarted && !happyMusic.isPlaying()) {
+      getAudioContext().resume().then(() => {
+        audioStarted = true;
+        angryMusic.stop();
+        happyMusic.loop();
+      }).catch(error => {
+        console.error("AudioContext konnte nicht gestartet werden:", error);
+      });
+    }
+  }
+
+  if (showInfo) {
+    displayPlantInfo();
+  }
+}
+
+function displayPlantInfo() {
+  fill(0);
+  noStroke();
+  textSize(24);
+  textAlign(LEFT, TOP);
+  text(`Touch Sensitivity: ${touchSensitivity}`, 20, 100);
+  text(`Pot Touch: ${topf}`, 20, 140);
+  text(`Temperature: ${mockTemperature()} °C`, 20, 180);
+  text(`Humidity: ${mockHumidity()} %`, 20, 220);
+  text(`Moisture: ${mockMoisture()}`, 20, 260);
+  text(`Mood: ${isRed ? 'Angry' : 'Happy'}`, 20, 300);
+}
+
+function mockTemperature() {
+  return Math.round(random(15, 30)); // Mock-Wert für Temperatur
+}
+
+function mockHumidity() {
+  return Math.round(random(30, 70)); // Mock-Wert für Luftfeuchtigkeit
+}
+
+function mockMoisture() {
+  return random() > 0.5 ? 'Low' : 'Optimal'; // Mock-Wert für Bodenfeuchtigkeit
+}
+
+function toggleMusic() {
+  if (happyMusic.isPlaying() || angryMusic.isPlaying()) {
+    happyMusic.stop();
+    angryMusic.stop();
+    audioStarted = false;
+  } else {
+    if (touchSensitivity > 5) {
+      angryMusic.loop();
+    } else {
+      happyMusic.loop();
+    }
+  }
+}
+
+function toggleInfo() {
+  showInfo = !showInfo;
+}
+class Particle {
+  constructor(args) {
+    let def = {
+      p: createVector(0, 0),
+      v: createVector(0, 0),
+      a: createVector(0, 0),
+      r: 4,
+      w: 10,
+      color: color(255),
+      child: false,
+      lastP: createVector(0, 0),
+    };
+    Object.assign(def, args);
+    Object.assign(this, def);
+  }
+
+  draw() {
+    push();
+    translate(this.p.x, this.p.y);
+    rotate(this.v.heading() - PI * 1.5);
+
+    // Verwende die Farbe entsprechend der touchSensitivity
+    fill(this.color);
+
+    // Optional: visuelle Gestaltung für den Partikel
+    if (random() > 0.7) {
+      let count = int(random(2, 4));
+      for (let i = 0; i < count; i++) {
+        push();
+        rotate((i * 2 - 1) / 1.2 * this.v.heading() / (1 + random(2)) * random(-1, 1) + PI * 0.5);
+        fill(random(colors));
+        beginShape();
+        let ww = this.v.y + random(-5, 5);
+        vertex(0, 0);
+        curveVertex(ww / 2, 5);
+        vertex(ww, 0);
+        curveVertex(ww / 2, -5);
+        endShape(CLOSE);
+        pop();
+      }
+    }
+
+    for (let o = 0; o < this.r; o += 1) {
+      let c = color(random(colors));
+      c.setAlpha(random(80));
+      stroke(c);
+      line(o, 0, o, this.v.y / random(1.5, 2.5));
+    }
+
+    pop();
+  }
+
+  update() {
+    this.lastP = this.p.copy();
+    this.p.add(this.v);
+    this.v.add(this.a);
+    this.v.mult(0.99);
+
+    // Ändere die Farbe der Partikel abhängig von der touchSensitivity
+    if (touchSensitivity > 5) {
+      this.color = color(random(redColors));
+    } else {
+      this.color = color(random(colors));
+    }
+
+    // Überprüfe, ob die Partikel aus dem Bildschirm gefallen sind
+    if (this.p.y < -50) {
+      this.dead = true;
+    }
+    if (this.child) {
+      this.r -= 4;
+      if (this.r < 1) {
+        this.dead = true;
+      }
+    }
+  }
+}

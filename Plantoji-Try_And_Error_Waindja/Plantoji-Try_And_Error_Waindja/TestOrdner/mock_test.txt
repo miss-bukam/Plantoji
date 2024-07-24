@@ -1,0 +1,76 @@
+let mockMoisture = 0;
+let mockLight = 0;
+let mockTouch = 0;
+let touchThreshold = 5;
+let colorRed = false;
+
+// Setup-Funktion wird einmal beim Starten aufgerufen
+function setup() {
+    createCanvas(windowWidth, windowHeight);
+    frameRate(5);  // Setze die Framerate auf 5 FPS für langsamere Ausführung
+}
+
+// Draw-Funktion wird kontinuierlich aufgerufen
+function draw() {
+    background(255);
+
+    // Simuliere Sensorwerte mit Mock-Daten
+    simulateSensorData();
+
+    // Überprüfe Touch-Werte und aktualisiere die Benutzeroberfläche
+    if (mockTouch > touchThreshold) {
+        colorRed = true;  // Ändere die Farbe auf Rot, wenn der Touch-Wert hoch ist
+        drawRedDesign();
+    } else {
+        colorRed = false;
+        drawNormalDesign();
+    }
+
+    // Zeige Sensorwerte für Debugging
+    displaySensorData();
+}
+
+// Simuliere Sensorwerte
+function simulateSensorData() {
+    mockMoisture = random(0, 400);  // Werte für Bodenfeuchtigkeit simulieren
+    mockLight = random(0, 1000);    // Werte für Lichtstärke simulieren
+    mockTouch = random(0, 10);      // Werte für Touch-Sensor simulieren
+}
+
+// Zeichne das Design für normalen Touch
+function drawNormalDesign() {
+    fill(0, 255, 0);
+    noStroke();
+    ellipse(width / 2, height / 2, 100, 100);
+}
+
+// Zeichne das Design für starken Touch
+function drawRedDesign() {
+    fill(255, 0, 0);
+    noStroke();
+    ellipse(width / 2, height / 2, 200, 200);
+
+    // Füge hier die Funktionalität des OpenProcessing Sketches hinzu
+    // Dies ist ein einfaches Beispiel für das Design
+    for (let i = 0; i < 100; i++) {
+        let x = random(width);
+        let y = random(height);
+        let r = random(10, 50);
+        ellipse(x, y, r, r);
+    }
+}
+
+// Zeige die simulierten Sensorwerte auf der Leinwand
+function displaySensorData() {
+    fill(0);
+    textSize(16);
+    textAlign(LEFT, TOP);
+    text(`Moisture: ${mockMoisture.toFixed(2)}`, 10, 10);
+    text(`Light: ${mockLight.toFixed(2)}`, 10, 30);
+    text(`Touch: ${mockTouch.toFixed(2)}`, 10, 50);
+}
+
+// Größe der Leinwand bei Fensteränderungen anpassen
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+}

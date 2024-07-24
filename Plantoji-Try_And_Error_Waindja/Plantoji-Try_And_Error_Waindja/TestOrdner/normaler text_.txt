@@ -1,0 +1,167 @@
+let serial;
+let latestData = "waiting for data";
+let freqExchangePoints = 0;
+let isRed = false;
+let touchSensitivity = 0;
+let topf = 0;
+let specificLeaf;
+let particles = [];
+let happyMusic;
+let angryMusic;
+let musicButton;
+let infoButton;
+
+let greenColors = ["#cdf2ba", "#77af5b", "#76a855", "#c4e878", "#e8f78a", "#dded63", "#f1f4e6"];
+let redColors = ["#ffcccc", "#ff9999", "#ff6666", "#ff3333", "#ff0000", "#cc0000", "#990000"];
+
+
+function preload() {
+  soundFormats('mp3', 'ogg');
+  happyMusic = loadSound('mp3/Deep_in_the_Forest.mp3');
+  angryMusic = loadSound('mp3/READY_TO_FIGHT.mp3');
+}
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  frameRate(10);
+
+  serial = new p5.SerialPort();
+  serial.list();
+  serial.open("/dev/ttyUSB0");
+  serial.on('data', serialEvent);
+
+  setupButtons();
+  drawBackground();
+  generateParticles();
+}
+
+function setupButtons() {
+  musicButton = createButton('♫');
+  musicButton.position(width - 90, 20);
+  musicButton.size(50, 50);
+  musicButton.style('font-size', '50px');
+  musicButton.style('background-color', 'transparent');
+  musicButton.style('border', 'none');
+  musicButton.style('color', 'gray');
+  musicButton.style('text-shadow', '1px 2px 3px black');
+  musicButton.mousePressed(toggleMusic);
+}
+
+function drawBackground() {
+  let currentTime = hour();
+  if (currentTime >= 6 && currentTime < 12) {
+    drawGradient("#B0E0E6", "#FFD700");
+  } else if (currentTime >= 12 && currentTime < 18) {
+    drawGradient("#1874CD", "#B0E0E6");
+  } else if (currentTime >= 18 && currentTime < 21) {
+    drawGradient("#8470FF", "#FF7F24");
+  } else {
+    drawGradient("#191970", "#000080");
+  }
+}
+
+function drawGradient(c1, c2) {
+  for (let y = 0; y < height; y++) {
+    let inter = map(y, 0, height, 0, 1);
+    let c = lerpColor(color(c1), color(c2), inter);
+    stroke(c);
+    line(0, y, width, y);
+  }
+}
+
+function generateParticles() {
+  specificLeaf = new Particle({
+    p: createVector(width / 2, height / 2),
+    v: createVector(random(-6, 6), random(-30, -100)),
+    r: random(8, 18),
+    w: random(20, 30),
+    color: color("#76a855")
+  });
+  particles.push(specificLeaf);
+}
+
+
+
+//Hier werden die neuen Daten ankommen die von Arduino aufgerufen werden
+function serialEvent() {
+  let inData = serial.readLine().trim();
+  if (inData.length > 0) {
+    latestData = inData;
+    processSerialData();
+  }
+}
+
+//Verarbeiten die angekommenen Daten 
+function processSerialData() {
+  let data = latestData.split(",");
+  touchSensitivity = parseInt(data[0]);
+  topf = parseInt(data[1]);
+  // ... Bodenfeuchtigkeit und Lichtdaten verarbeiten
+}
+
+
+//Zeichnet die Blätter
+function draw() {
+  background(220);
+  particles.forEach(p => {
+    p.update();
+    p.draw();
+  });
+   particles = particles.filter(p => random() < 0.99 && !p.dead);
+
+  if (topf > 5) {
+    isRed = true;
+  } else {
+    isRed = false;
+  }
+
+  updateLeafColor();
+}
+
+
+//Ändert die Farbe basierend auf der Touchintensity der Pflanze
+function updateLeafColor() {
+  specificLeaf.color = isRed ? color(random(redColors)) : color(random(greenColors));
+}
+
+
+
+class Particle {
+  constructor(config) {
+    this.p = config.p;
+    this.v = config.v;
+    this.r = config.r;
+    this.w = config.w;
+    this.color = config.color;
+    this.dead = false;
+  }
+  
+  update() {
+    this.p.add(this.v);
+    this.v.y += 0.3;
+    this.r -= 0.1;
+    if (this.r <= 0) {
+      this.dead = true;
+    }
+  }
+
+  draw() {
+    noStroke();
+    fill(this.color);
+    ellipse(this.p.x, this.p.y, this.r * 2);
+  }
+}
+
+//Abspiel der Musik
+function toggleMusic() {
+  if (happyMusic.isPlaying() || angryMusic.isPlaying()) {
+    happyMusic.stop();
+    angryMusic.stop();
+  } else {
+    if (isRed) {
+      angryMusic.loop();
+    } else {
+      happyMusic.loop();
+    }
+  }
+}
