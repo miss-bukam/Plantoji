@@ -251,14 +251,21 @@ function toggleInfo() {
     infoButton.style('background-color', 'gray'); // Grau bei Deaktivierung
     infoButton.style('border', '2px solid gray');
   }
+  
+  // Beim Klicken auf den Herz-Button die Smiley-Umrandungen ändern
+  if (showInfo) {
+    smileyOutlineColor = 'white'; // Umrandung auf weiß setzen
+  } else {
+    smileyOutlineColor = 'black'; // Zurück auf schwarz setzen, wenn Info deaktiviert wird
+  }
 }
 
 // Funktion für die Infobox alls Pot angefasst wird
 function displayPlantDescription() {
   const x = width - 300;
-  const y = height / 2;
+  const y = height - 350;
   const boxWidth = 520;
-  const boxHeight = 750; // Erhöhen Sie die Höhe, um Platz für das Bild zu schaffen
+  const boxHeight = 610; // Erhöhen Sie die Höhe, um Platz für das Bild zu schaffen
   const padding = 10;
   const titlePadding = 40;
   const spaceAfterColon = '   '; // Mehrere Leerzeichen
@@ -344,14 +351,6 @@ function displayPlantDescription() {
     'Growth Habit: Erect',
     'Leaf Color: Green',
     'Fruit Color: Red'
-  ]);
-
-  addTextSection('Application', [
-    'Garden Style: Container garden',
-    'Light: Full sun to partial shade',
-    'Soil Moisture: Moderately dry to moist',
-    'Soil Type: Sandy to loamy',
-    'Use: Interior landscaping, containers, conservatories'
   ]);
 }
 
@@ -640,6 +639,8 @@ function drawSunPopup() {
   text("☀️ Put me under the Sun!", width / 2, height / 2 + 200);
 }
 
+let smileyOutlineColor = 'black';
+
 // Funktion zum Anzeigen eines Smileys basierend auf der Stimmung
 function displaySmiley() {
   let smileyX = 300; // Smiley nach links verschieben
@@ -653,16 +654,22 @@ function displaySmiley() {
   } else {
     fill(255, 255, 0); // Gelb für glücklichen Smiley
   }
+  
+  stroke('black')
+  strokeWeight(4);
   ellipse(smileyX, smileyY, smileySize);
-
+  
   // Augen
   fill(0);
   ellipse(smileyX - smileySize / 4, smileyY - smileySize / 4, eyeSize);
   ellipse(smileyX + smileySize / 4, smileyY - smileySize / 4, eyeSize);
 
   // Mund
+  stroke('black'); // Umrandung in der festgelegten Farbe zeichnen
+
+  
   noFill();
-  stroke(0);
+  stroke('black');
   strokeWeight(4);
 
   if (isRed) {
