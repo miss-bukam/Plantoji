@@ -384,13 +384,13 @@ function drawGradient(c1, c2) {
 // -------------------  Sticker anzeigen, wenn 50 Frequency Exchange Points erreicht werden
 function displaySticker() {
   let stickerInterval = 50;
-  
+
   // Überprüfen, ob ein neuer Sticker verliehen werden soll
   let lastStickerPoint = stickerPoints.length > 0 ? stickerPoints[stickerPoints.length - 1] : 0;
 
   // Wenn Punkte den letzten Sticker-Punkt + Sticker-Intervall überschreiten und der Sticker noch nicht angezeigt wurde
-  if (points >= lastStickerPoint + stickerInterval && !stickerPoints.includes(points)) {
-    stickerPoints.push(points); // Füge die aktuellen Punkte zum Array hinzu
+  if (points >= lastStickerPoint + stickerInterval && !stickerPoints.includes(lastStickerPoint + stickerInterval)) {
+    stickerPoints.push(lastStickerPoint + stickerInterval); // Füge den nächsten Sticker-Punkt zum Array hinzu
   }
 
   // Zeichnen aller Sticker basierend auf den gespeicherten Punkten
