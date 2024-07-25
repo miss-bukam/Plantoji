@@ -83,9 +83,9 @@ class Particle {
 let particles = [];
 
 function preload() {
-  console.log("Loading CSV...");
+  console.log("Attempting to load CSV from path: Design/Datenempfang_Processing/output.csv");
   try {
-    table = loadTable('output.csv', 'csv', 'header', function() {
+    table = loadTable('Design/Datenempfang_Processing/output.csv', 'csv', 'header', function() {
       console.log("CSV loaded successfully");
     }, function() {
       console.error("Error loading CSV");
@@ -93,12 +93,12 @@ function preload() {
   } catch (e) {
     console.error("Exception while loading CSV: ", e);
   }
-  
+ 
   soundFormats('mp3', 'ogg');
-  happyMusic = loadSound('sketch_240722c/Deep_in_the_Forest.mp3', loaded('happyMusic'), loadError('happyMusic'));
-  angryMusic = loadSound('sketch_240722c/READY_TO_FIGHT.mp3', loaded('angryMusic'), loadError('angryMusic'));
-
+  happyMusic = loadSound('sketch_240722c/Deep_in_the_Forest.mp3', () => console.log('happyMusic loaded successfully'), (err) => console.error('Error loading happyMusic:', err));
+  angryMusic = loadSound('sketch_240722c/READY_TO_FIGHT.mp3', () => console.log('angryMusic loaded successfully'), (err) => console.error('Error loading angryMusic:', err));
 }
+
 
 function loaded() {
   console.log('Sound loaded successfully');
