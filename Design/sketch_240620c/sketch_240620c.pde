@@ -6,6 +6,7 @@ String myText = "";
 float luxValue = 0;
 boolean portAvailable = true;
 boolean topfTouched = false; // Neue Variable für Topf-Berührung
+String moistureStatus = ""; // Variable für Bodenfeuchtigkeit
 
 PrintWriter output;
 
@@ -18,7 +19,7 @@ void setup() {
   output.println("Zeit,Bodenfeuchtigkeit,Luxwert,TopfBeruehrt");
 
   try {
-    myPort = new Serial(this, "/dev/cu.usbmodem1101", 9600); // COM3 durch deinen korrekten Port ersetzen
+    myPort = new Serial(this, "COM3", 9600); // COM3 durch deinen korrekten Port ersetzen
     myPort.bufferUntil('\n');
   } catch (Exception e) {
     portAvailable = false;
@@ -27,36 +28,24 @@ void setup() {
 }
 
 void serialEvent(Serial myPort) {
-  myText = myPort.readStringUntil('\n').trim();
+  String inString = myPort.readStringUntil('\n');
+  if (inString != null) {
+    inString = inString.trim();
+    println("Received: " + inString);
 
-  // Bodenfeuchtigkeit aus der Nachricht extrahieren
-  if (myText.startsWith("Status: ")) {
-    String moistureStatus = myText.substring(8);
-    if (moistureStatus.equals("Der Boden ist zu feucht")) {
-      myText = "zu feucht";
-    } else if (moistureStatus.equals("Die Bodenfeuchtigkeit ist perfekt")) {
-      myText = "perfekt";
-    } else if (moistureStatus.equals("Der Boden ist zu trocken")) {
-      myText = "zu trocken";
+    if (inString.startsWith("Status: ")) {
+      moistureStatus = inString.substring(8);
+    } else if (inString.startsWith("Lichtwert: ")) {
+      luxValue = float(inString.substring(11));
+    } else if (inString.startsWith("Topf Value: ")) {
+      int topfValue = int(inString.substring(11));
+      topfTouched = topfValue > 2;
     }
-  }
 
-  // Lichtwert aus der Nachricht extrahieren
-  if (myText.startsWith("Lichtwert: ")) {
-    String luxStr = myText.substring(11);
-    luxValue = float(luxStr);
+    // Daten in CSV-Datei schreiben
+    String timeStamp = str(hour()) + ":" + nf(minute(), 2) + ":" + nf(second(), 2);
+    output.println(timeStamp + "," + moistureStatus + "," + luxValue + "," + topfTouched);
   }
-
-  // Topf-Berührung aus der Nachricht extrahieren
-  if (myText.equals("Topf angefasst")) {
-    topfTouched = true;
-  } else {
-    topfTouched = false;
-  }
-
-  // Daten in CSV-Datei schreiben
-  String timeStamp = str(hour()) + ":" + str(minute()) + ":" + str(second());
-  output.println(timeStamp + "," + myText + "," + luxValue + "," + topfTouched);
 }
 
 void draw() {
@@ -93,34 +82,34 @@ void draw() {
   textSize(22);
 
   // Bodenfeuchtigkeit
-  String moistureStatus = "";
-  if (myText.equals("zu feucht")) {
-    moistureStatus = "Bitte nicht mehr gießen";
-  } else if (myText.equals("perfekt")) {
-    moistureStatus = "Mir geht es gut";
-  } else if (myText.equals("zu trocken")) {
-    moistureStatus = "Ich habe Durst";
+  String moistureMessage = "";
+  if (moistureStatus.equals("Der Boden ist zu feucht")) {
+    moistureMessage = "Bitte nicht mehr gießen";
+  } else if (moistureStatus.equals("Die Bodenfeuchtigkeit ist perfekt")) {
+    moistureMessage = "Mir geht es gut";
+  } else if (moistureStatus.equals("Der Boden ist zu trocken")) {
+    moistureMessage = "Ich habe Durst";
   } else {
-    moistureStatus = "Warte auf Daten...";
+    moistureMessage = "Warte auf Daten...";
   }
   fill(255); // Weiß
-  text(moistureStatus, boxX + boxWidth / 4, statusY - iconOffset);
-  drawStatusIcon(moistureStatus, boxX + boxWidth / 4, statusY, 50);
+  text(moistureMessage, boxX + boxWidth / 4, statusY - iconOffset);
+  drawStatusIcon(moistureMessage, boxX + boxWidth / 4, statusY, 50);
 
   // Lichtbedingungen
-  String lightStatus = "";
+  String lightMessage = "";
   if (luxValue < 100) {
-    lightStatus = "Ich brauche Licht!";
+    lightMessage = "Ich brauche Licht!";
   } else if (luxValue >= 100 && luxValue <= 1000) {
-    lightStatus = "Perfekte Lichtverhältnisse";
+    lightMessage = "Perfekte Lichtverhältnisse";
   } else if (luxValue > 1000) {
-    lightStatus = "Es ist zu warm!";
+    lightMessage = "Es ist zu warm!";
   } else {
-    lightStatus = "Warte auf Daten...";
+    lightMessage = "Warte auf Daten...";
   }
   fill(255);
-  text(lightStatus, boxX + 3 * boxWidth / 4, statusY - iconOffset);
-  drawStatusIcon(lightStatus, boxX + 3 * boxWidth / 4, statusY, 50);
+  text(lightMessage, boxX + 3 * boxWidth / 4, statusY - iconOffset);
+  drawStatusIcon(lightMessage, boxX + 3 * boxWidth / 4, statusY, 50);
 
   // Topf-Berührung
   float touchX = width / 2;
@@ -139,26 +128,15 @@ void draw() {
 }
 
 void drawStatusIcon(String status, float x, float y, float size) {
-  if (status.contains("Bitte nicht mehr gießen")) {
+  if (status.contains("Bitte nicht mehr gießen") || status.contains("Es ist zu warm!")) {
     fill(255, 0, 0); // Rot
-  } else if (status.contains("Mir geht es gut")) {
+  } else if (status.contains("Mir geht es gut") || status.contains("Perfekte Lichtverhältnisse")) {
     fill(0, 255, 0); // Grün
-  } else if (status.contains("Ich habe Durst")) {
+  } else if (status.contains("Ich habe Durst") || status.contains("Ich brauche Licht!")) {
     fill(255, 165, 0); // Orange
-  } else if (status.contains("zu feucht")) {
-    fill(255, 0, 0); // Rot
-  } else if (status.contains("Perfekte Lichtverhältnisse")) {
-    fill(0, 255, 0); // Grün
-  } else if (status.contains("zu trocken")) {
-    fill(255, 165, 0); // Orange
-  } else if (status.contains("Ich brauche Licht!")) {
-    fill(255, 165, 0); // Orange
-  } else if (status.contains("Es ist zu warm!")) {
-    fill(255, 0, 0); // Rot
   } else {
     fill(128); // Grau
   }
-
   ellipse(x, y, size, size);
 }
 
@@ -167,22 +145,22 @@ void simulateData() {
   // Wechsel zwischen verschiedenen Zuständen
   float currentTime = millis() / 1000.0;
   if (currentTime % 10 < 3) {
-    myText = "zu feucht";
+    moistureStatus = "Der Boden ist zu feucht";
     luxValue = 50;
     topfTouched = false;
   } else if (currentTime % 10 < 6) {
-    myText = "perfekt";
+    moistureStatus = "Die Bodenfeuchtigkeit ist perfekt";
     luxValue = 500;
     topfTouched = true;
   } else {
-    myText = "zu trocken";
+    moistureStatus = "Der Boden ist zu trocken";
     luxValue = 1500;
     topfTouched = false;
   }
 
   // Daten in CSV-Datei schreiben (für Simulation)
-  String timeStamp = str(hour()) + ":" + str(minute()) + ":" + str(second());
-  output.println(timeStamp + "," + myText + "," + luxValue + "," + topfTouched);
+  String timeStamp = str(hour()) + ":" + nf(minute(), 2) + ":" + nf(second(), 2);
+  output.println(timeStamp + "," + moistureStatus + "," + luxValue + "," + topfTouched);
 }
 
 // CSV-Datei schließen, wenn das Programm beendet wird
